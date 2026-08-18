@@ -8,9 +8,10 @@ import {
   ScrollView,
   Switch,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { UserSettings } from '../types';
 import { saveMobileSettings } from '../services/storage';
+import { THEME } from '../types/theme';
 
 interface SettingsScreenProps {
   settings: UserSettings;
@@ -41,7 +42,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Toast */}
       {saved && (
         <View style={styles.saveBadge}>
-          <Ionicons name="checkmark" size={13} color="#10B981" />
+          <Ionicons name="checkmark-circle" size={14} color={THEME.colors.success} />
           <Text style={styles.saveBadgeText}>Preferência salva com sucesso</Text>
         </View>
       )}
@@ -57,7 +58,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Section 1: Content & Metadata */}
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
-          <Ionicons name="options-outline" size={16} color="#818CF8" />
+          <Feather name="sliders" size={16} color={THEME.colors.primaryAccent} />
           <Text style={styles.sectionTitle}>Padrões de Conteúdo e Metadados</Text>
         </View>
 
@@ -71,8 +72,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <Switch
             value={localSettings.includeFrontmatter}
             onValueChange={(val) => updateSetting('includeFrontmatter', val)}
-            trackColor={{ false: '#334155', true: '#4338CA' }}
-            thumbColor={localSettings.includeFrontmatter ? '#818CF8' : '#94A3B8'}
+            trackColor={{ false: '#3F3F46', true: THEME.colors.primaryDark }}
+            thumbColor={localSettings.includeFrontmatter ? THEME.colors.primaryLight : '#A1A1AA'}
           />
         </View>
 
@@ -88,8 +89,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <Switch
             value={localSettings.includeImages}
             onValueChange={(val) => updateSetting('includeImages', val)}
-            trackColor={{ false: '#334155', true: '#4338CA' }}
-            thumbColor={localSettings.includeImages ? '#818CF8' : '#94A3B8'}
+            trackColor={{ false: '#3F3F46', true: THEME.colors.primaryDark }}
+            thumbColor={localSettings.includeImages ? THEME.colors.primaryLight : '#A1A1AA'}
           />
         </View>
 
@@ -105,8 +106,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
           <Switch
             value={localSettings.includeLinks}
             onValueChange={(val) => updateSetting('includeLinks', val)}
-            trackColor={{ false: '#334155', true: '#4338CA' }}
-            thumbColor={localSettings.includeLinks ? '#818CF8' : '#94A3B8'}
+            trackColor={{ false: '#3F3F46', true: THEME.colors.primaryDark }}
+            thumbColor={localSettings.includeLinks ? THEME.colors.primaryLight : '#A1A1AA'}
           />
         </View>
       </View>
@@ -114,7 +115,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Section 2: Markdown Syntax Styling */}
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
-          <Ionicons name="code-slash-outline" size={16} color="#34D399" />
+          <Feather name="code" size={16} color={THEME.colors.success} />
           <Text style={styles.sectionTitle}>Estilo de Sintaxe Markdown</Text>
         </View>
 
@@ -218,7 +219,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Section 3: Subfolder / Export */}
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
-          <Ionicons name="folder-outline" size={16} color="#FBBF24" />
+          <Feather name="folder" size={16} color={THEME.colors.warning} />
           <Text style={styles.sectionTitle}>Regras de Exportação e Armazenamento</Text>
         </View>
 
@@ -232,7 +233,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             value={localSettings.downloadFolder}
             onChangeText={(txt) => updateSetting('downloadFolder', txt)}
             placeholder="Web2MD"
-            placeholderTextColor="#64748B"
+            placeholderTextColor={THEME.colors.textMuted}
           />
         </View>
       </View>
@@ -240,7 +241,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Section 4: Ecosystem & Platform Info */}
       <View style={styles.ecosystemCard}>
         <View style={styles.sectionHeader}>
-          <Ionicons name="shield-checkmark-outline" size={16} color="#60A5FA" />
+          <Feather name="shield" size={16} color={THEME.colors.info} />
           <Text style={styles.sectionTitle}>Ecossistema Multiplataforma Web2MD</Text>
         </View>
 
@@ -259,7 +260,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         <View style={styles.platformRow}>
           <View style={styles.platformIconBox}>
-            <Ionicons name="phone-portrait-outline" size={18} color="#818CF8" />
+            <Feather name="smartphone" size={18} color={THEME.colors.primaryAccent} />
           </View>
           <View style={styles.platformTextCol}>
             <Text style={styles.platformTitle}>Aplicativo Mobile</Text>
@@ -282,7 +283,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#090D16',
+    backgroundColor: THEME.colors.bg,
   },
   scrollContent: {
     padding: 16,
@@ -292,8 +293,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     alignSelf: 'center',
-    backgroundColor: '#064E3B',
-    borderColor: '#059669',
+    backgroundColor: THEME.colors.successBg,
+    borderColor: THEME.colors.success,
     borderWidth: 1,
     paddingHorizontal: 12,
     paddingVertical: 5,
@@ -310,22 +311,22 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   headerTitle: {
-    color: '#F8FAFC',
+    color: THEME.colors.textPrimary,
     fontSize: 18,
     fontWeight: '800',
     marginBottom: 4,
   },
   headerDesc: {
-    color: '#64748B',
+    color: THEME.colors.textSecondary,
     fontSize: 12,
     lineHeight: 18,
   },
   card: {
-    backgroundColor: '#0F172A',
-    borderRadius: 14,
-    padding: 16,
+    backgroundColor: THEME.colors.bgCard,
+    borderRadius: THEME.radius.xl,
+    padding: 18,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: THEME.colors.border,
     marginBottom: 16,
   },
   sectionHeader: {
@@ -335,8 +336,8 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   sectionTitle: {
-    color: '#E2E8F0',
-    fontSize: 13,
+    color: THEME.colors.textPrimary,
+    fontSize: 13.5,
     fontWeight: '700',
   },
   row: {
@@ -350,19 +351,19 @@ const styles = StyleSheet.create({
     paddingRight: 12,
   },
   rowLabel: {
-    color: '#F1F5F9',
+    color: THEME.colors.textPrimary,
     fontSize: 13,
     fontWeight: '600',
     marginBottom: 2,
   },
   rowDesc: {
-    color: '#64748B',
+    color: THEME.colors.textSecondary,
     fontSize: 11,
     lineHeight: 16,
   },
   divider: {
     height: 1,
-    backgroundColor: '#1E293B',
+    backgroundColor: THEME.colors.border,
     marginVertical: 12,
   },
   optionBlock: {
@@ -374,87 +375,89 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   pill: {
-    backgroundColor: '#1E293B',
+    backgroundColor: THEME.colors.bgButtonSecondary,
     paddingHorizontal: 12,
     paddingVertical: 7,
-    borderRadius: 8,
+    borderRadius: THEME.radius.sm,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: THEME.colors.border,
   },
   pillSmall: {
-    backgroundColor: '#1E293B',
+    backgroundColor: THEME.colors.bgButtonSecondary,
     paddingHorizontal: 16,
     paddingVertical: 7,
-    borderRadius: 8,
+    borderRadius: THEME.radius.sm,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: THEME.colors.border,
   },
   pillActive: {
-    backgroundColor: '#1E1B4B',
-    borderColor: '#6366F1',
+    backgroundColor: THEME.colors.primaryBadgeBg,
+    borderColor: THEME.colors.primary,
   },
   pillText: {
-    color: '#94A3B8',
+    color: THEME.colors.textMuted,
     fontSize: 12,
     fontWeight: '600',
   },
   pillTextActive: {
-    color: '#A5B4FC',
+    color: THEME.colors.primaryAccent,
   },
   folderInput: {
-    backgroundColor: '#090D16',
+    backgroundColor: THEME.colors.bgInput,
     borderWidth: 1,
-    borderColor: '#334155',
-    borderRadius: 8,
+    borderColor: THEME.colors.border,
+    borderRadius: THEME.radius.sm,
     paddingHorizontal: 12,
-    height: 40,
-    color: '#F8FAFC',
+    height: 42,
+    color: THEME.colors.textPrimary,
     fontSize: 13,
     marginTop: 8,
   },
   ecosystemCard: {
-    backgroundColor: '#0B1120',
-    borderRadius: 14,
-    padding: 16,
+    backgroundColor: THEME.colors.bgCardSecondary,
+    borderRadius: THEME.radius.xl,
+    padding: 18,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: THEME.colors.border,
   },
   platformRow: {
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: THEME.colors.border,
     gap: 10,
   },
   platformIconBox: {
-    width: 34,
-    height: 34,
-    borderRadius: 8,
-    backgroundColor: '#1E293B',
+    width: 36,
+    height: 36,
+    borderRadius: THEME.radius.sm,
+    backgroundColor: THEME.colors.bgCard,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: THEME.colors.border,
   },
   platformTextCol: {
     flex: 1,
   },
   platformTitle: {
-    color: '#F1F5F9',
+    color: THEME.colors.textPrimary,
     fontSize: 13,
     fontWeight: '600',
   },
   platformSubtitle: {
-    color: '#64748B',
+    color: THEME.colors.textSecondary,
     fontSize: 11,
   },
   badgeActive: {
-    backgroundColor: '#064E3B',
+    backgroundColor: THEME.colors.successBg,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
   },
   badgeActiveText: {
-    color: '#34D399',
+    color: THEME.colors.success,
     fontSize: 10,
     fontWeight: '700',
   },
@@ -464,12 +467,12 @@ const styles = StyleSheet.create({
     gap: 4,
   },
   versionFooter: {
-    color: '#475569',
+    color: THEME.colors.textMuted,
     fontSize: 11,
     fontWeight: '500',
   },
   authorFooter: {
-    color: '#818CF8',
+    color: THEME.colors.primaryAccent,
     fontSize: 12,
     fontWeight: '700',
     letterSpacing: 0.2,

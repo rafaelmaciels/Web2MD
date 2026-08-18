@@ -1,11 +1,12 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Switch } from 'react-native';
+import { View, Text, StyleSheet, Switch } from 'react-native';
+import { THEME } from '../types/theme';
 
 interface QuickTogglesProps {
   includeFrontmatter: boolean;
   includeImages: boolean;
-  onToggleFrontmatter: (value: boolean) => void;
-  onToggleImages: (value: boolean) => void;
+  onToggleFrontmatter: (val: boolean) => void;
+  onToggleImages: (val: boolean) => void;
 }
 
 export const QuickToggles: React.FC<QuickTogglesProps> = ({
@@ -16,25 +17,29 @@ export const QuickToggles: React.FC<QuickTogglesProps> = ({
 }) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        style={[styles.chip, includeFrontmatter && styles.chipActive]}
-        onPress={() => onToggleFrontmatter(!includeFrontmatter)}
-        activeOpacity={0.8}
-      >
-        <Text style={[styles.chipText, includeFrontmatter && styles.chipTextActive]}>
-          Frontmatter
-        </Text>
-        <View style={[styles.dot, includeFrontmatter && styles.dotActive]} />
-      </TouchableOpacity>
+      <View style={styles.toggleItem}>
+        <Text style={styles.label}>Frontmatter</Text>
+        <Switch
+          value={includeFrontmatter}
+          onValueChange={onToggleFrontmatter}
+          trackColor={{ false: '#3F3F46', true: THEME.colors.primaryDark }}
+          thumbColor={includeFrontmatter ? THEME.colors.primaryLight : '#A1A1AA'}
+          style={styles.switchSmall}
+        />
+      </View>
 
-      <TouchableOpacity
-        style={[styles.chip, includeImages && styles.chipActive]}
-        onPress={() => onToggleImages(!includeImages)}
-        activeOpacity={0.8}
-      >
-        <Text style={[styles.chipText, includeImages && styles.chipTextActive]}>Images</Text>
-        <View style={[styles.dot, includeImages && styles.dotActive]} />
-      </TouchableOpacity>
+      <View style={styles.divider} />
+
+      <View style={styles.toggleItem}>
+        <Text style={styles.label}>Imagens</Text>
+        <Switch
+          value={includeImages}
+          onValueChange={onToggleImages}
+          trackColor={{ false: '#3F3F46', true: THEME.colors.primaryDark }}
+          thumbColor={includeImages ? THEME.colors.primaryLight : '#A1A1AA'}
+          style={styles.switchSmall}
+        />
+      </View>
     </View>
   );
 };
@@ -43,38 +48,30 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: THEME.colors.bgCard,
+    borderRadius: THEME.radius.sm,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
     gap: 8,
+    borderWidth: 1,
+    borderColor: THEME.colors.border,
   },
-  chip: {
+  toggleItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1E293B',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 20,
     gap: 6,
-    borderWidth: 1,
-    borderColor: '#334155',
   },
-  chipActive: {
-    backgroundColor: '#1E1B4B',
-    borderColor: '#6366F1',
+  label: {
+    color: THEME.colors.textSecondary,
+    fontSize: 11.5,
+    fontWeight: '500',
   },
-  chipText: {
-    color: '#94A3B8',
-    fontSize: 11,
-    fontWeight: '600',
+  switchSmall: {
+    transform: [{ scaleX: 0.75 }, { scaleY: 0.75 }],
   },
-  chipTextActive: {
-    color: '#A5B4FC',
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: '#64748B',
-  },
-  dotActive: {
-    backgroundColor: '#10B981',
+  divider: {
+    width: 1,
+    height: 16,
+    backgroundColor: THEME.colors.border,
   },
 });

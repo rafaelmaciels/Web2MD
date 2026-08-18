@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { THEME } from '../types/theme';
 
 interface HeaderProps {
   onRefresh?: () => void;
@@ -12,9 +13,11 @@ export const Header: React.FC<HeaderProps> = ({ onRefresh, onOpenSettings }) => 
   return (
     <View style={styles.header}>
       <View style={styles.brandRow}>
+        {/* Geometric Squircle Brand Icon */}
         <View style={styles.iconBadge}>
           <Text style={styles.iconText}>M↓</Text>
         </View>
+        
         <View style={styles.titleCol}>
           <View style={styles.titleRow}>
             <Text style={styles.brandTitle}>Web2MD</Text>
@@ -29,12 +32,12 @@ export const Header: React.FC<HeaderProps> = ({ onRefresh, onOpenSettings }) => 
       <View style={styles.actions}>
         {onRefresh && (
           <TouchableOpacity style={styles.actionBtn} onPress={onRefresh} activeOpacity={0.7}>
-            <Ionicons name="refresh-outline" size={18} color="#94A3B8" />
+            <Ionicons name="refresh-outline" size={18} color={THEME.colors.textSecondary} />
           </TouchableOpacity>
         )}
         {onOpenSettings && (
           <TouchableOpacity style={styles.actionBtn} onPress={onOpenSettings} activeOpacity={0.7}>
-            <Ionicons name="settings-outline" size={18} color="#94A3B8" />
+            <Ionicons name="settings-outline" size={18} color={THEME.colors.textSecondary} />
           </TouchableOpacity>
         )}
       </View>
@@ -47,11 +50,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 18,
     paddingVertical: 14,
-    backgroundColor: '#0F172A',
+    backgroundColor: THEME.colors.bgHeader,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: THEME.colors.border,
   },
   brandRow: {
     flexDirection: 'row',
@@ -59,12 +62,19 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   iconBadge: {
-    width: 38,
-    height: 38,
-    borderRadius: 10,
-    backgroundColor: '#6366F1',
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: THEME.colors.primary,
     alignItems: 'center',
     justifyContent: 'center',
+    shadowColor: THEME.colors.primaryDark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 8,
+    elevation: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.15)',
   },
   iconText: {
     color: '#FFFFFF',
@@ -78,29 +88,33 @@ const styles = StyleSheet.create({
   titleRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
+    gap: 7,
   },
   brandTitle: {
-    color: '#F8FAFC',
-    fontSize: 18,
+    color: THEME.colors.textPrimary,
+    fontSize: 19,
     fontWeight: '800',
     letterSpacing: -0.3,
   },
   versionBadge: {
-    backgroundColor: '#312E81',
-    paddingHorizontal: 6,
+    backgroundColor: THEME.colors.primaryBadgeBg,
+    paddingHorizontal: 7,
     paddingVertical: 2,
-    borderRadius: 6,
+    borderRadius: 9999,
+    borderWidth: 1,
+    borderColor: 'rgba(192, 132, 252, 0.3)',
   },
   versionText: {
-    color: '#A5B4FC',
+    color: THEME.colors.primaryAccent,
     fontSize: 10,
     fontWeight: '700',
+    letterSpacing: 0.2,
   },
   brandSubtitle: {
-    color: '#64748B',
-    fontSize: 11,
-    fontWeight: '500',
+    color: '#9E9E9E',
+    fontSize: 11.5,
+    fontWeight: '400',
+    marginTop: 1,
   },
   actions: {
     flexDirection: 'row',
@@ -110,8 +124,10 @@ const styles = StyleSheet.create({
   actionBtn: {
     width: 36,
     height: 36,
-    borderRadius: 8,
-    backgroundColor: '#1E293B',
+    borderRadius: THEME.radius.sm,
+    backgroundColor: THEME.colors.bgCard,
+    borderWidth: 1,
+    borderColor: THEME.colors.border,
     alignItems: 'center',
     justifyContent: 'center',
   },

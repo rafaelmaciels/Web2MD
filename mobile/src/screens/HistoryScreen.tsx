@@ -7,10 +7,11 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { ConversionHistoryItem, ExtractedPage } from '../types';
 import { getMobileHistory, deleteHistoryItem, clearMobileHistory } from '../services/storage';
 import { copyToClipboard } from '../services/exporter';
+import { THEME } from '../types/theme';
 
 interface HistoryScreenProps {
   onSelectItem: (extracted: ExtractedPage) => void;
@@ -97,7 +98,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
         <View style={styles.topBar}>
           <Text style={styles.topBarCount}>{history.length} conversões salvas</Text>
           <TouchableOpacity style={styles.clearBtn} onPress={handleClearAll}>
-            <Ionicons name="trash-outline" size={13} color="#EF4444" />
+            <Feather name="trash-2" size={13} color="#EF4444" />
             <Text style={styles.clearBtnText}>Limpar Tudo</Text>
           </TouchableOpacity>
         </View>
@@ -110,7 +111,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconBadge}>
-              <Ionicons name="time-outline" size={32} color="#6366F1" />
+              <Feather name="clock" size={30} color={THEME.colors.primaryAccent} />
             </View>
             <Text style={styles.emptyTitle}>Nenhuma Conversão Ainda</Text>
             <Text style={styles.emptyDesc}>
@@ -136,11 +137,11 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
 
               <View style={styles.metaRow}>
                 <View style={styles.metaBadge}>
-                  <Ionicons name="document-text-outline" size={11} color="#94A3B8" />
+                  <Feather name="file-text" size={11} color={THEME.colors.textSecondary} />
                   <Text style={styles.metaText}>{item.wordCount} palavras</Text>
                 </View>
                 <View style={styles.metaBadge}>
-                  <Ionicons name="time-outline" size={11} color="#94A3B8" />
+                  <Feather name="clock" size={11} color={THEME.colors.textSecondary} />
                   <Text style={styles.metaText}>{item.readingTimeMinutes} min de leitura</Text>
                 </View>
               </View>
@@ -152,10 +153,10 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
                 onPress={() => handleCopy(item)}
                 activeOpacity={0.7}
               >
-                <Ionicons
-                  name={copiedId === item.id ? 'checkmark' : 'copy-outline'}
+                <Feather
+                  name={copiedId === item.id ? 'check' : 'copy'}
                   size={14}
-                  color={copiedId === item.id ? '#10B981' : '#94A3B8'}
+                  color={copiedId === item.id ? THEME.colors.success : THEME.colors.textSecondary}
                 />
               </TouchableOpacity>
 
@@ -164,7 +165,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
                 onPress={() => handleOpen(item)}
                 activeOpacity={0.7}
               >
-                <Ionicons name="open-outline" size={14} color="#818CF8" />
+                <Feather name="external-link" size={14} color={THEME.colors.primaryAccent} />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -172,7 +173,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
                 onPress={() => handleDelete(item.id)}
                 activeOpacity={0.7}
               >
-                <Ionicons name="trash-outline" size={14} color="#EF4444" />
+                <Feather name="trash-2" size={14} color={THEME.colors.danger} />
               </TouchableOpacity>
             </View>
           </View>
@@ -185,7 +186,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#090D16',
+    backgroundColor: THEME.colors.bg,
   },
   topBar: {
     flexDirection: 'row',
@@ -193,12 +194,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 10,
-    backgroundColor: '#0F172A',
+    backgroundColor: THEME.colors.bgHeader,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: THEME.colors.border,
   },
   topBarCount: {
-    color: '#94A3B8',
+    color: THEME.colors.textSecondary,
     fontSize: 12,
     fontWeight: '600',
   },
@@ -206,10 +207,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#450A0A',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    backgroundColor: THEME.colors.dangerBg,
+    paddingHorizontal: 9,
+    paddingVertical: 5,
+    borderRadius: THEME.radius.sm,
   },
   clearBtnText: {
     color: '#FCA5A5',
@@ -231,36 +232,36 @@ const styles = StyleSheet.create({
   emptyIconBadge: {
     width: 64,
     height: 64,
-    borderRadius: 16,
-    backgroundColor: '#1E1B4B',
+    borderRadius: THEME.radius.xl,
+    backgroundColor: THEME.colors.primaryBadgeBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#4338CA',
+    borderColor: 'rgba(123, 31, 162, 0.4)',
   },
   emptyTitle: {
-    color: '#F8FAFC',
+    color: THEME.colors.textPrimary,
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 8,
   },
   emptyDesc: {
-    color: '#64748B',
+    color: THEME.colors.textSecondary,
     fontSize: 13,
     textAlign: 'center',
     lineHeight: 20,
   },
   card: {
-    backgroundColor: '#0F172A',
-    borderRadius: 12,
+    backgroundColor: THEME.colors.bgCard,
+    borderRadius: THEME.radius.lg,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: THEME.colors.border,
     overflow: 'hidden',
     marginBottom: 12,
   },
   cardContent: {
-    padding: 14,
+    padding: 15,
   },
   cardHeader: {
     flexDirection: 'row',
@@ -269,23 +270,23 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   domainTag: {
-    color: '#818CF8',
+    color: THEME.colors.primaryAccent,
     fontSize: 11,
     fontWeight: '700',
-    backgroundColor: '#1E1B4B',
-    paddingHorizontal: 6,
+    backgroundColor: THEME.colors.primaryBadgeBg,
+    paddingHorizontal: 7,
     paddingVertical: 2,
     borderRadius: 4,
   },
   dateTag: {
-    color: '#64748B',
+    color: THEME.colors.textMuted,
     fontSize: 11,
   },
   title: {
-    color: '#F1F5F9',
+    color: THEME.colors.textPrimary,
     fontSize: 15,
     fontWeight: '700',
-    lineHeight: 20,
+    lineHeight: 21,
     marginBottom: 8,
   },
   metaRow: {
@@ -296,13 +297,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    backgroundColor: '#1E293B',
+    backgroundColor: THEME.colors.bgButtonSecondary,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
   },
   metaText: {
-    color: '#94A3B8',
+    color: THEME.colors.textSecondary,
     fontSize: 11,
     fontWeight: '500',
   },
@@ -310,8 +311,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-end',
     borderTopWidth: 1,
-    borderTopColor: '#1E293B',
-    backgroundColor: '#0B0F19',
+    borderTopColor: THEME.colors.border,
+    backgroundColor: THEME.colors.bgInput,
     paddingHorizontal: 12,
     paddingVertical: 6,
     gap: 12,

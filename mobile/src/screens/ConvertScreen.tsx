@@ -10,12 +10,13 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { ExtractedPage, UserSettings } from '../types';
 import { fetchAndExtractUrl, extractFromHtmlString, extractFromRawText } from '../services/fetcher';
 import { pasteFromClipboard } from '../services/exporter';
 import { convertToMarkdown } from '../core/markdown';
 import { addHistoryItem } from '../services/storage';
+import { THEME } from '../types/theme';
 
 interface ConvertScreenProps {
   settings: UserSettings;
@@ -29,6 +30,7 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
   const [rawTitle, setRawTitle] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [isInputFocused, setIsInputFocused] = useState<boolean>(false);
 
   const sampleUrls = [
     { title: 'Wikipedia (Markdown)', url: 'https://pt.wikipedia.org/wiki/Markdown' },
@@ -123,49 +125,64 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
       style={styles.container}
     >
       <ScrollView contentContainerStyle={styles.scrollContent} keyboardShouldPersistTaps="handled">
-        {/* Mode Switcher */}
-        <View style={styles.modeTabs}>
+        {/* A. Modern Segmented Control */}
+        <View style={styles.segmentedControl}>
           <TouchableOpacity
-            style={[styles.modeTab, mode === 'url' && styles.modeTabActive]}
+            style={[styles.segmentBtn, mode === 'url' && styles.segmentBtnActive]}
             onPress={() => {
               setMode('url');
               setErrorMsg(null);
             }}
             activeOpacity={0.8}
           >
-            <Ionicons name="globe-outline" size={15} color={mode === 'url' ? '#818CF8' : '#64748B'} />
-            <Text style={[styles.modeTabText, mode === 'url' && styles.modeTabTextActive]}>
+            <Feather
+              name="globe"
+              size={15}
+              color={mode === 'url' ? THEME.colors.primaryAccent : THEME.colors.textMuted}
+            />
+            <Text style={[styles.segmentBtnText, mode === 'url' && styles.segmentBtnTextActive]}>
               URL da Web
             </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[styles.modeTab, mode === 'raw' && styles.modeTabActive]}
+            style={[styles.segmentBtn, mode === 'raw' && styles.segmentBtnActive]}
             onPress={() => {
               setMode('raw');
               setErrorMsg(null);
             }}
             activeOpacity={0.8}
           >
-            <Ionicons name="code-slash-outline" size={15} color={mode === 'raw' ? '#818CF8' : '#64748B'} />
-            <Text style={[styles.modeTabText, mode === 'raw' && styles.modeTabTextActive]}>
+            <Feather
+              name="code"
+              size={15}
+              color={mode === 'raw' ? THEME.colors.primaryAccent : THEME.colors.textMuted}
+            />
+            <Text style={[styles.segmentBtnText, mode === 'raw' && styles.segmentBtnTextActive]}>
               HTML / Texto
             </Text>
           </TouchableOpacity>
         </View>
 
-        {/* URL Mode */}
+        {/* B. Input Card */}
         {mode === 'url' ? (
           <View style={styles.card}>
-            <Text style={styles.inputLabel}>Digite a URL da Página ou Artigo</Text>
-            <View style={styles.inputRow}>
-              <Ionicons name="globe-outline" size={18} color="#64748B" style={styles.inputIcon} />
+            <Text style={styles.inputLabel}>DIGITE A URL DA PÁGINA OU ARTIGO</Text>
+            <View
+              style={[
+                styles.inputRow,
+                isInputFocused && styles.inputRowFocused,
+              ]}
+            >
+              <Feather name="link" size={16} color={THEME.colors.textMuted} style={styles.inputIcon} />
               <TextInput
                 style={styles.textInput}
                 placeholder="https://exemplo.com/artigo..."
-                placeholderTextColor="#64748B"
+                placeholderTextColor={THEME.colors.textMuted}
                 value={urlInput}
                 onChangeText={setUrlInput}
+                onFocus={() => setIsInputFocused(true)}
+                onBlur={() => setIsInputFocused(false)}
                 autoCapitalize="none"
                 autoCorrect={false}
                 keyboardType="url"
@@ -173,7 +190,7 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
                 onSubmitEditing={handleConvert}
               />
               <TouchableOpacity style={styles.pasteBtn} onPress={handlePaste} activeOpacity={0.7}>
-                <Ionicons name="clipboard-outline" size={14} color="#A5B4FC" />
+                <Feather name="clipboard" size={13} color={THEME.colors.primaryAccent} />
                 <Text style={styles.pasteBtnText}>Colar</Text>
               </TouchableOpacity>
             </View>
@@ -198,26 +215,26 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
         ) : (
           /* Raw HTML / Text Mode */
           <View style={styles.card}>
-            <Text style={styles.inputLabel}>Título do Documento (Opcional)</Text>
+            <Text style={styles.inputLabel}>TÍTULO DO DOCUMENTO (OPCIONAL)</Text>
             <TextInput
               style={[styles.textInput, styles.titleInput]}
               placeholder="Ex: Minha Anotação Salva"
-              placeholderTextColor="#64748B"
+              placeholderTextColor={THEME.colors.textMuted}
               value={rawTitle}
               onChangeText={setRawTitle}
             />
 
             <View style={styles.rawHeaderRow}>
-              <Text style={styles.inputLabel}>Cole o Conteúdo em HTML ou Texto</Text>
+              <Text style={styles.inputLabel}>CONTEÚDO EM HTML OU TEXTO</Text>
               <TouchableOpacity style={styles.pasteBtnSmall} onPress={handlePaste}>
-                <Ionicons name="clipboard-outline" size={12} color="#A5B4FC" />
+                <Feather name="clipboard" size={12} color={THEME.colors.primaryAccent} />
                 <Text style={styles.pasteBtnTextSmall}>Colar</Text>
               </TouchableOpacity>
             </View>
             <TextInput
               style={[styles.textInput, styles.textArea]}
               placeholder="Cole tags HTML ou texto bruto aqui..."
-              placeholderTextColor="#64748B"
+              placeholderTextColor={THEME.colors.textMuted}
               value={rawInput}
               onChangeText={setRawInput}
               multiline
@@ -230,45 +247,54 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
         {/* Error Notification */}
         {errorMsg && (
           <View style={styles.errorBox}>
+            <Ionicons name="alert-circle-outline" size={18} color="#FCA5A5" />
             <Text style={styles.errorText}>{errorMsg}</Text>
           </View>
         )}
 
-        {/* Convert Action Button */}
+        {/* C. Primary Action CTA Button */}
         <TouchableOpacity
           style={[styles.convertBtn, loading && styles.convertBtnDisabled]}
           onPress={handleConvert}
           disabled={loading}
-          activeOpacity={0.8}
+          activeOpacity={0.85}
         >
           {loading ? (
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
             <>
-              <Ionicons name="sparkles" size={17} color="#FFFFFF" />
+              <Feather name="file-text" size={18} color="#FFFFFF" />
               <Text style={styles.convertBtnText}>Converter para Markdown</Text>
-              <Ionicons name="arrow-forward" size={17} color="#FFFFFF" />
+              <Feather name="arrow-right" size={18} color="#FFFFFF" />
             </>
           )}
         </TouchableOpacity>
 
-        {/* Feature Highlights Card */}
+        {/* D. Features Card */}
         <View style={styles.featuresCard}>
           <Text style={styles.featuresTitle}>O que o Web2MD faz automaticamente:</Text>
           <View style={styles.featureItem}>
-            <Text style={styles.featureCheck}>✓</Text>
+            <View style={styles.checkBadge}>
+              <Ionicons name="checkmark" size={12} color={THEME.colors.success} />
+            </View>
             <Text style={styles.featureText}>Remove poluição visual, anúncios, menus de navegação e popups</Text>
           </View>
           <View style={styles.featureItem}>
-            <Text style={styles.featureCheck}>✓</Text>
+            <View style={styles.checkBadge}>
+              <Ionicons name="checkmark" size={12} color={THEME.colors.success} />
+            </View>
             <Text style={styles.featureText}>Extrai cabeçalho YAML Frontmatter com metadados (Autor, URL, Data)</Text>
           </View>
           <View style={styles.featureItem}>
-            <Text style={styles.featureCheck}>✓</Text>
+            <View style={styles.checkBadge}>
+              <Ionicons name="checkmark" size={12} color={THEME.colors.success} />
+            </View>
             <Text style={styles.featureText}>Formata Tabelas, Blocos de Código com sintaxe e Listas (GFM)</Text>
           </View>
           <View style={styles.featureItem}>
-            <Text style={styles.featureCheck}>✓</Text>
+            <View style={styles.checkBadge}>
+              <Ionicons name="checkmark" size={12} color={THEME.colors.success} />
+            </View>
             <Text style={styles.featureText}>Calcula tempo estimado de leitura, contagem de palavras e caracteres</Text>
           </View>
         </View>
@@ -280,90 +306,94 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#090D16',
+    backgroundColor: THEME.colors.bg,
   },
   scrollContent: {
     padding: 16,
-    paddingBottom: 32,
+    paddingBottom: 36,
   },
-  modeTabs: {
+  segmentedControl: {
     flexDirection: 'row',
-    backgroundColor: '#0F172A',
-    borderRadius: 12,
+    backgroundColor: THEME.colors.bgCard,
+    borderRadius: THEME.radius.lg,
     padding: 4,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: THEME.colors.border,
   },
-  modeTab: {
+  segmentBtn: {
     flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     paddingVertical: 10,
-    borderRadius: 8,
-    gap: 8,
+    borderRadius: THEME.radius.md,
+    gap: 7,
   },
-  modeTabActive: {
-    backgroundColor: '#1E293B',
+  segmentBtnActive: {
+    backgroundColor: THEME.colors.bgButtonSecondary,
+    borderWidth: 1,
+    borderColor: 'rgba(123, 31, 162, 0.4)',
   },
-  modeTabText: {
-    color: '#64748B',
+  segmentBtnText: {
+    color: THEME.colors.textMuted,
     fontSize: 13,
     fontWeight: '600',
   },
-  modeTabTextActive: {
-    color: '#F8FAFC',
+  segmentBtnTextActive: {
+    color: THEME.colors.textPrimary,
   },
   card: {
-    backgroundColor: '#0F172A',
-    borderRadius: 14,
-    padding: 16,
+    backgroundColor: THEME.colors.bgCard,
+    borderRadius: THEME.radius.xl,
+    padding: 18,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: THEME.colors.border,
     marginBottom: 16,
   },
   inputLabel: {
-    color: '#94A3B8',
-    fontSize: 12,
-    fontWeight: '600',
+    color: THEME.colors.textSecondary,
+    fontSize: 11,
+    fontWeight: '700',
     marginBottom: 8,
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
+    letterSpacing: 0.8,
   },
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#090D16',
+    backgroundColor: THEME.colors.bgInput,
     borderWidth: 1,
-    borderColor: '#334155',
-    borderRadius: 10,
+    borderColor: THEME.colors.border,
+    borderRadius: THEME.radius.md,
     paddingHorizontal: 12,
-    height: 48,
+    height: 50,
+  },
+  inputRowFocused: {
+    borderColor: THEME.colors.primaryLight,
   },
   inputIcon: {
     marginRight: 8,
   },
   textInput: {
     flex: 1,
-    color: '#F8FAFC',
+    color: THEME.colors.textPrimary,
     fontSize: 14,
     height: '100%',
   },
   titleInput: {
-    backgroundColor: '#090D16',
+    backgroundColor: THEME.colors.bgInput,
     borderWidth: 1,
-    borderColor: '#334155',
-    borderRadius: 10,
+    borderColor: THEME.colors.border,
+    borderRadius: THEME.radius.md,
     paddingHorizontal: 12,
-    height: 44,
+    height: 46,
     marginBottom: 14,
   },
   textArea: {
-    backgroundColor: '#090D16',
+    backgroundColor: THEME.colors.bgInput,
     borderWidth: 1,
-    borderColor: '#334155',
-    borderRadius: 10,
+    borderColor: THEME.colors.border,
+    borderRadius: THEME.radius.md,
     padding: 12,
     height: 120,
   },
@@ -376,28 +406,30 @@ const styles = StyleSheet.create({
   pasteBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1E293B',
+    backgroundColor: THEME.colors.bgButtonSecondary,
     paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 6,
-    gap: 4,
+    paddingVertical: 7,
+    borderRadius: THEME.radius.sm,
+    gap: 5,
+    borderWidth: 1,
+    borderColor: THEME.colors.border,
   },
   pasteBtnText: {
-    color: '#A5B4FC',
+    color: THEME.colors.primaryAccent,
     fontSize: 12,
     fontWeight: '600',
   },
   pasteBtnSmall: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1E293B',
+    backgroundColor: THEME.colors.bgButtonSecondary,
     paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
+    paddingVertical: 5,
+    borderRadius: THEME.radius.sm,
     gap: 4,
   },
   pasteBtnTextSmall: {
-    color: '#A5B4FC',
+    color: THEME.colors.primaryAccent,
     fontSize: 11,
     fontWeight: '600',
   },
@@ -405,10 +437,10 @@ const styles = StyleSheet.create({
     marginTop: 14,
     paddingTop: 12,
     borderTopWidth: 1,
-    borderTopColor: '#1E293B',
+    borderTopColor: THEME.colors.border,
   },
   samplesLabel: {
-    color: '#64748B',
+    color: THEME.colors.textMuted,
     fontSize: 11,
     fontWeight: '600',
     marginBottom: 8,
@@ -419,23 +451,26 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sampleChip: {
-    backgroundColor: '#1E293B',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
+    backgroundColor: THEME.colors.bgCardSecondary,
+    paddingHorizontal: 11,
+    paddingVertical: 6,
+    borderRadius: THEME.radius.sm,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: THEME.colors.border,
   },
   sampleChipText: {
-    color: '#CBD5E1',
+    color: '#E4E4E7',
     fontSize: 12,
     fontWeight: '500',
   },
   errorBox: {
-    backgroundColor: '#450A0A',
-    borderColor: '#DC2626',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    backgroundColor: THEME.colors.dangerBg,
+    borderColor: THEME.colors.danger,
     borderWidth: 1,
-    borderRadius: 10,
+    borderRadius: THEME.radius.md,
     padding: 12,
     marginBottom: 16,
   },
@@ -444,16 +479,22 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '500',
     lineHeight: 18,
+    flex: 1,
   },
   convertBtn: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#6366F1',
-    borderRadius: 12,
-    paddingVertical: 14,
-    gap: 8,
+    backgroundColor: THEME.colors.primary,
+    borderRadius: THEME.radius.lg,
+    paddingVertical: 15,
+    gap: 10,
     marginBottom: 20,
+    shadowColor: THEME.colors.primaryDark,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 8,
+    elevation: 3,
   },
   convertBtnDisabled: {
     opacity: 0.6,
@@ -462,36 +503,42 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 15,
     fontWeight: '700',
+    letterSpacing: 0.2,
   },
   featuresCard: {
-    backgroundColor: '#0F172A',
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: THEME.colors.bgCard,
+    borderRadius: THEME.radius.xl,
+    padding: 18,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: THEME.colors.border,
   },
   featuresTitle: {
-    color: '#E2E8F0',
-    fontSize: 13,
+    color: THEME.colors.textPrimary,
+    fontSize: 13.5,
     fontWeight: '700',
-    marginBottom: 12,
+    marginBottom: 14,
   },
   featureItem: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 8,
-    gap: 8,
+    marginBottom: 12,
+    gap: 10,
   },
-  featureCheck: {
-    color: '#10B981',
-    fontSize: 14,
-    fontWeight: '800',
-    lineHeight: 18,
+  checkBadge: {
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: THEME.colors.successBg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 2,
+    borderWidth: 1,
+    borderColor: THEME.colors.success,
   },
   featureText: {
-    color: '#94A3B8',
-    fontSize: 12,
-    lineHeight: 18,
+    color: THEME.colors.textSecondary,
+    fontSize: 12.5,
+    lineHeight: 19,
     flex: 1,
   },
 });

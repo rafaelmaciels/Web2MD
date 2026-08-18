@@ -16,6 +16,7 @@ import { QuickToggles } from '../components/QuickToggles';
 import { MarkdownViewer } from '../components/MarkdownViewer';
 import { copyToClipboard, shareMarkdownFile } from '../services/exporter';
 import { saveMobileSettings } from '../services/storage';
+import { THEME } from '../types/theme';
 
 interface EditorScreenProps {
   extracted: ExtractedPage | null;
@@ -72,7 +73,7 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
     return (
       <View style={styles.emptyContainer}>
         <View style={styles.emptyIconBadge}>
-          <Feather name="edit-3" size={32} color="#6366F1" />
+          <Feather name="edit-3" size={30} color={THEME.colors.primaryAccent} />
         </View>
         <Text style={styles.emptyTitle}>Nenhum Documento Carregado</Text>
         <Text style={styles.emptyDesc}>
@@ -89,7 +90,7 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
     >
       {/* URL & Domain Bar */}
       <View style={styles.urlBar}>
-        <Ionicons name="globe-outline" size={13} color="#818CF8" />
+        <Feather name="globe" size={13} color={THEME.colors.primaryAccent} />
         <Text style={styles.urlDomain} numberOfLines={1}>
           {extracted.domain}
         </Text>
@@ -109,7 +110,11 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
             onPress={() => setActiveTab('editor')}
             activeOpacity={0.7}
           >
-            <Feather name="edit-3" size={13} color={activeTab === 'editor' ? '#818CF8' : '#94A3B8'} />
+            <Feather
+              name="edit-3"
+              size={13}
+              color={activeTab === 'editor' ? THEME.colors.primaryAccent : THEME.colors.textMuted}
+            />
             <Text style={[styles.tabBtnText, activeTab === 'editor' && styles.tabBtnTextActive]}>
               Editor
             </Text>
@@ -120,7 +125,11 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
             onPress={() => setActiveTab('preview')}
             activeOpacity={0.7}
           >
-            <Ionicons name="eye-outline" size={13} color={activeTab === 'preview' ? '#818CF8' : '#94A3B8'} />
+            <Feather
+              name="eye"
+              size={13}
+              color={activeTab === 'preview' ? THEME.colors.primaryAccent : THEME.colors.textMuted}
+            />
             <Text style={[styles.tabBtnText, activeTab === 'preview' && styles.tabBtnTextActive]}>
               Prévia
             </Text>
@@ -156,7 +165,7 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
             }}
             multiline
             placeholder="O conteúdo em Markdown aparecerá aqui..."
-            placeholderTextColor="#64748B"
+            placeholderTextColor={THEME.colors.textMuted}
             textAlignVertical="top"
           />
         ) : (
@@ -165,7 +174,7 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
 
         {copied && (
           <View style={styles.toast}>
-            <Ionicons name="checkmark" size={14} color="#10B981" />
+            <Ionicons name="checkmark-circle" size={16} color={THEME.colors.success} />
             <Text style={styles.toastText}>Copiado para a Área de Transferência!</Text>
           </View>
         )}
@@ -179,23 +188,23 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
             value={filename}
             onChangeText={setFilename}
             placeholder="nome_do_arquivo.md"
-            placeholderTextColor="#64748B"
+            placeholderTextColor={THEME.colors.textMuted}
           />
         </View>
 
         <TouchableOpacity style={styles.btnSecondary} onPress={handleCopy} activeOpacity={0.7}>
-          <Ionicons
-            name={copied ? 'checkmark' : 'copy-outline'}
-            size={15}
-            color={copied ? '#10B981' : '#F1F5F9'}
+          <Feather
+            name={copied ? 'check' : 'copy'}
+            size={14}
+            color={copied ? THEME.colors.success : THEME.colors.textPrimary}
           />
-          <Text style={[styles.btnSecondaryText, copied && { color: '#10B981' }]}>
+          <Text style={[styles.btnSecondaryText, copied && { color: THEME.colors.success }]}>
             {copied ? 'Copiado' : 'Copiar'}
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.btnPrimary} onPress={handleShare} activeOpacity={0.8}>
-          <Ionicons name="share-social-outline" size={15} color="#FFFFFF" />
+        <TouchableOpacity style={styles.btnPrimary} onPress={handleShare} activeOpacity={0.85}>
+          <Feather name="share-2" size={14} color="#FFFFFF" />
           <Text style={styles.btnPrimaryText}>Compartilhar / Salvar</Text>
         </TouchableOpacity>
       </View>
@@ -206,34 +215,34 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#090D16',
+    backgroundColor: THEME.colors.bg,
   },
   emptyContainer: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
     padding: 32,
-    backgroundColor: '#090D16',
+    backgroundColor: THEME.colors.bg,
   },
   emptyIconBadge: {
     width: 64,
     height: 64,
-    borderRadius: 16,
-    backgroundColor: '#1E1B4B',
+    borderRadius: THEME.radius.xl,
+    backgroundColor: THEME.colors.primaryBadgeBg,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: '#4338CA',
+    borderColor: 'rgba(123, 31, 162, 0.4)',
   },
   emptyTitle: {
-    color: '#F8FAFC',
+    color: THEME.colors.textPrimary,
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 8,
   },
   emptyDesc: {
-    color: '#64748B',
+    color: THEME.colors.textSecondary,
     fontSize: 13,
     textAlign: 'center',
     lineHeight: 20,
@@ -241,20 +250,20 @@ const styles = StyleSheet.create({
   urlBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0B0F19',
+    backgroundColor: THEME.colors.bgHeader,
     paddingHorizontal: 16,
     paddingVertical: 8,
     gap: 6,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: THEME.colors.border,
   },
   urlDomain: {
-    color: '#818CF8',
+    color: THEME.colors.primaryAccent,
     fontSize: 12,
     fontWeight: '700',
   },
   urlPath: {
-    color: '#64748B',
+    color: THEME.colors.textMuted,
     fontSize: 12,
     flex: 1,
   },
@@ -262,20 +271,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    backgroundColor: '#0F172A',
+    backgroundColor: THEME.colors.bgCard,
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
+    borderBottomColor: THEME.colors.border,
   },
   tabButtons: {
     flexDirection: 'row',
-    backgroundColor: '#090D16',
-    borderRadius: 8,
+    backgroundColor: THEME.colors.bgInput,
+    borderRadius: THEME.radius.sm,
     padding: 3,
     gap: 4,
     borderWidth: 1,
-    borderColor: '#1E293B',
+    borderColor: THEME.colors.border,
   },
   tabBtn: {
     flexDirection: 'row',
@@ -286,15 +295,15 @@ const styles = StyleSheet.create({
     gap: 5,
   },
   tabBtnActive: {
-    backgroundColor: '#1E293B',
+    backgroundColor: THEME.colors.bgButtonSecondary,
   },
   tabBtnText: {
-    color: '#94A3B8',
+    color: THEME.colors.textMuted,
     fontSize: 12,
     fontWeight: '600',
   },
   tabBtnTextActive: {
-    color: '#F8FAFC',
+    color: THEME.colors.textPrimary,
   },
   mainArea: {
     flex: 1,
@@ -302,12 +311,12 @@ const styles = StyleSheet.create({
   },
   editorInput: {
     flex: 1,
-    backgroundColor: '#090D16',
-    color: '#E2E8F0',
-    fontSize: 13,
+    backgroundColor: THEME.colors.bg,
+    color: THEME.colors.textPrimary,
+    fontSize: 13.5,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
     padding: 16,
-    lineHeight: 20,
+    lineHeight: 21,
   },
   toast: {
     position: 'absolute',
@@ -315,8 +324,8 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#064E3B',
-    borderColor: '#059669',
+    backgroundColor: THEME.colors.successBg,
+    borderColor: THEME.colors.success,
     borderWidth: 1,
     paddingHorizontal: 14,
     paddingVertical: 8,
@@ -331,52 +340,57 @@ const styles = StyleSheet.create({
   footer: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#0F172A',
+    backgroundColor: THEME.colors.bgHeader,
     paddingHorizontal: 14,
     paddingVertical: 12,
     borderTopWidth: 1,
-    borderTopColor: '#1E293B',
+    borderTopColor: THEME.colors.border,
     gap: 8,
   },
   filenameWrapper: {
     flex: 1,
-    backgroundColor: '#090D16',
+    backgroundColor: THEME.colors.bgInput,
     borderWidth: 1,
-    borderColor: '#334155',
-    borderRadius: 8,
+    borderColor: THEME.colors.border,
+    borderRadius: THEME.radius.sm,
     paddingHorizontal: 10,
-    height: 38,
+    height: 40,
     justifyContent: 'center',
   },
   filenameInput: {
-    color: '#F8FAFC',
+    color: THEME.colors.textPrimary,
     fontSize: 12,
     fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
   },
   btnSecondary: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1E293B',
+    backgroundColor: THEME.colors.bgButtonSecondary,
     paddingHorizontal: 12,
-    height: 38,
-    borderRadius: 8,
+    height: 40,
+    borderRadius: THEME.radius.sm,
     gap: 6,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: THEME.colors.border,
   },
   btnSecondaryText: {
-    color: '#F1F5F9',
+    color: THEME.colors.textPrimary,
     fontSize: 13,
     fontWeight: '600',
   },
   btnPrimary: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#6366F1',
+    backgroundColor: THEME.colors.primary,
     paddingHorizontal: 14,
-    height: 38,
-    borderRadius: 8,
+    height: 40,
+    borderRadius: THEME.radius.sm,
     gap: 6,
+    shadowColor: THEME.colors.primaryDark,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
   },
   btnPrimaryText: {
     color: '#FFFFFF',

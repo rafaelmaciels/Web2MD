@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, TouchableOpacity, Text, StatusBar, Platform, SafeAreaView } from 'react-native';
-import { Ionicons, Feather } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { ExtractedPage, UserSettings, DEFAULT_SETTINGS } from './src/types';
 import { getMobileSettings } from './src/services/storage';
 import { Header } from './src/components/Header';
@@ -8,6 +8,7 @@ import { ConvertScreen } from './src/screens/ConvertScreen';
 import { EditorScreen } from './src/screens/EditorScreen';
 import { HistoryScreen } from './src/screens/HistoryScreen';
 import { SettingsScreen } from './src/screens/SettingsScreen';
+import { THEME } from './src/types/theme';
 
 type TabType = 'convert' | 'editor' | 'history' | 'settings';
 
@@ -34,7 +35,7 @@ export default function App() {
 
   return (
     <SafeAreaView style={styles.safeArea}>
-      <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
+      <StatusBar barStyle="light-content" backgroundColor={THEME.colors.bgHeader} />
 
       {/* Top Brand Header */}
       <Header
@@ -71,17 +72,17 @@ export default function App() {
         )}
       </View>
 
-      {/* Bottom Navigation Bar */}
+      {/* E. Refined Bottom Navigation Bar */}
       <View style={styles.bottomNav}>
         <TouchableOpacity
-          style={[styles.navItem, activeTab === 'convert' && styles.navItemActive]}
+          style={styles.navItem}
           onPress={() => setActiveTab('convert')}
           activeOpacity={0.7}
         >
-          <Ionicons
-            name={activeTab === 'convert' ? 'sparkles' : 'sparkles-outline'}
+          <Feather
+            name="layers"
             size={20}
-            color={activeTab === 'convert' ? '#818CF8' : '#64748B'}
+            color={activeTab === 'convert' ? THEME.colors.primaryAccent : THEME.colors.textMuted}
           />
           <Text style={[styles.navLabel, activeTab === 'convert' && styles.navLabelActive]}>
             Converter
@@ -89,14 +90,14 @@ export default function App() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.navItem, activeTab === 'editor' && styles.navItemActive]}
+          style={styles.navItem}
           onPress={() => setActiveTab('editor')}
           activeOpacity={0.7}
         >
           <Feather
             name="edit-3"
             size={20}
-            color={activeTab === 'editor' ? '#818CF8' : '#64748B'}
+            color={activeTab === 'editor' ? THEME.colors.primaryAccent : THEME.colors.textMuted}
           />
           <Text style={[styles.navLabel, activeTab === 'editor' && styles.navLabelActive]}>
             Editor
@@ -104,14 +105,14 @@ export default function App() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.navItem, activeTab === 'history' && styles.navItemActive]}
+          style={styles.navItem}
           onPress={() => setActiveTab('history')}
           activeOpacity={0.7}
         >
-          <Ionicons
-            name={activeTab === 'history' ? 'time' : 'time-outline'}
+          <Feather
+            name="clock"
             size={20}
-            color={activeTab === 'history' ? '#818CF8' : '#64748B'}
+            color={activeTab === 'history' ? THEME.colors.primaryAccent : THEME.colors.textMuted}
           />
           <Text style={[styles.navLabel, activeTab === 'history' && styles.navLabelActive]}>
             Histórico
@@ -119,14 +120,14 @@ export default function App() {
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[styles.navItem, activeTab === 'settings' && styles.navItemActive]}
+          style={styles.navItem}
           onPress={() => setActiveTab('settings')}
           activeOpacity={0.7}
         >
-          <Ionicons
-            name={activeTab === 'settings' ? 'settings' : 'settings-outline'}
+          <Feather
+            name="sliders"
             size={20}
-            color={activeTab === 'settings' ? '#818CF8' : '#64748B'}
+            color={activeTab === 'settings' ? THEME.colors.primaryAccent : THEME.colors.textMuted}
           />
           <Text style={[styles.navLabel, activeTab === 'settings' && styles.navLabelActive]}>
             Ajustes
@@ -140,18 +141,18 @@ export default function App() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0F172A',
+    backgroundColor: THEME.colors.bgHeader,
     paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 28) : 0,
   },
   content: {
     flex: 1,
-    backgroundColor: '#090D16',
+    backgroundColor: THEME.colors.bg,
   },
   bottomNav: {
     flexDirection: 'row',
-    backgroundColor: '#0F172A',
+    backgroundColor: THEME.colors.bgHeader,
     borderTopWidth: 1,
-    borderTopColor: '#1E293B',
+    borderTopColor: THEME.colors.border,
     paddingVertical: 10,
     paddingBottom: Platform.OS === 'ios' ? 14 : 10,
   },
@@ -161,14 +162,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 4,
   },
-  navItemActive: {},
   navLabel: {
-    color: '#64748B',
+    color: THEME.colors.textMuted,
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '500',
   },
   navLabelActive: {
-    color: '#818CF8',
+    color: THEME.colors.primaryAccent,
     fontWeight: '700',
   },
 });

@@ -1,7 +1,8 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Feather } from '@expo/vector-icons';
 import { ConversionResult } from '../types';
+import { THEME } from '../types/theme';
 
 interface StatsBarProps {
   result: ConversionResult | null;
@@ -14,30 +15,30 @@ export const StatsBar: React.FC<StatsBarProps> = ({ result }) => {
     <View style={styles.container}>
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.statItem}>
-          <Ionicons name="document-text-outline" size={13} color="#818CF8" />
+          <Feather name="file-text" size={13} color={THEME.colors.primaryAccent} />
           <Text style={styles.statLabel}>Palavras:</Text>
           <Text style={styles.statValue}>{result.wordCount}</Text>
         </View>
 
         <View style={styles.statItem}>
-          <Ionicons name="code-slash-outline" size={13} color="#34D399" />
+          <Feather name="code" size={13} color={THEME.colors.success} />
           <Text style={styles.statLabel}>Caracteres:</Text>
           <Text style={styles.statValue}>{result.charCount}</Text>
         </View>
 
         <View style={styles.statItem}>
-          <Ionicons name="time-outline" size={13} color="#FBBF24" />
+          <Feather name="clock" size={13} color={THEME.colors.warning} />
           <Text style={styles.statLabel}>Tempo:</Text>
           <Text style={styles.statValue}>{result.readingTimeMinutes} min</Text>
         </View>
 
         <View style={styles.statItem}>
-          <Ionicons name="image-outline" size={13} color="#F472B6" />
+          <Feather name="image" size={13} color="#F472B6" />
           <Text style={styles.statValue}>{result.imageCount} imgs</Text>
         </View>
 
         <View style={styles.statItem}>
-          <Ionicons name="link-outline" size={13} color="#60A5FA" />
+          <Feather name="link" size={13} color={THEME.colors.info} />
           <Text style={styles.statValue}>{result.linkCount} links</Text>
         </View>
       </ScrollView>
@@ -47,10 +48,10 @@ export const StatsBar: React.FC<StatsBarProps> = ({ result }) => {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: '#0F172A',
+    backgroundColor: THEME.colors.bgHeader,
     borderBottomWidth: 1,
-    borderBottomColor: '#1E293B',
-    paddingVertical: 8,
+    borderBottomColor: THEME.colors.border,
+    paddingVertical: 9,
   },
   scrollContent: {
     paddingHorizontal: 16,
@@ -60,21 +61,21 @@ const styles = StyleSheet.create({
   statItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#1E293B',
+    backgroundColor: THEME.colors.bgCard,
     paddingHorizontal: 10,
     paddingVertical: 5,
-    borderRadius: 8,
+    borderRadius: THEME.radius.sm,
     gap: 5,
     borderWidth: 1,
-    borderColor: '#334155',
+    borderColor: THEME.colors.border,
   },
   statLabel: {
-    color: '#94A3B8',
+    color: THEME.colors.textSecondary,
     fontSize: 11,
     fontWeight: '500',
   },
   statValue: {
-    color: '#F1F5F9',
+    color: THEME.colors.textPrimary,
     fontSize: 11,
     fontWeight: '700',
   },

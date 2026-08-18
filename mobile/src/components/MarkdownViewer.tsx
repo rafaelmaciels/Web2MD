@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { THEME } from '../types/theme';
 
 interface MarkdownViewerProps {
   markdown: string;
@@ -138,7 +139,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ markdown }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#090D16',
+    backgroundColor: THEME.colors.bg,
   },
   content: {
     padding: 16,
@@ -149,35 +150,35 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     padding: 24,
-    backgroundColor: '#090D16',
+    backgroundColor: THEME.colors.bg,
   },
   emptyText: {
-    color: '#64748B',
+    color: THEME.colors.textMuted,
     fontSize: 14,
   },
   frontmatterCard: {
-    backgroundColor: '#1E1B4B',
-    borderColor: '#4338CA',
+    backgroundColor: '#251838',
+    borderColor: 'rgba(123, 31, 162, 0.5)',
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: THEME.radius.sm,
     padding: 12,
     marginBottom: 16,
   },
   frontmatterTag: {
-    color: '#A5B4FC',
+    color: THEME.colors.primaryAccent,
     fontSize: 10,
     fontWeight: '800',
     letterSpacing: 1,
     marginBottom: 6,
   },
   frontmatterText: {
-    color: '#E0E7FF',
+    color: '#F3E8FF',
     fontSize: 12,
     fontFamily: 'monospace',
     lineHeight: 18,
   },
   h1: {
-    color: '#F8FAFC',
+    color: THEME.colors.textPrimary,
     fontSize: 22,
     fontWeight: '800',
     marginBottom: 12,
@@ -185,7 +186,7 @@ const styles = StyleSheet.create({
     lineHeight: 28,
   },
   h2: {
-    color: '#F1F5F9',
+    color: THEME.colors.textPrimary,
     fontSize: 18,
     fontWeight: '700',
     marginBottom: 10,
@@ -193,35 +194,35 @@ const styles = StyleSheet.create({
     lineHeight: 24,
   },
   h3: {
-    color: '#E2E8F0',
+    color: '#E4E4E7',
     fontSize: 16,
     fontWeight: '600',
     marginBottom: 8,
     marginTop: 10,
   },
   h4: {
-    color: '#CBD5E1',
+    color: '#D4D4D8',
     fontSize: 14,
     fontWeight: '600',
     marginBottom: 6,
   },
   paragraph: {
-    color: '#CBD5E1',
+    color: '#D4D4D8',
     fontSize: 14,
     lineHeight: 22,
     marginBottom: 8,
   },
   quoteBox: {
     borderLeftWidth: 3,
-    borderLeftColor: '#6366F1',
+    borderLeftColor: THEME.colors.primary,
     paddingLeft: 12,
     paddingVertical: 4,
     marginVertical: 8,
-    backgroundColor: '#131B2E',
+    backgroundColor: '#1E1E28',
     borderRadius: 4,
   },
   quoteText: {
-    color: '#94A3B8',
+    color: THEME.colors.textSecondary,
     fontStyle: 'italic',
     fontSize: 13,
     lineHeight: 20,
@@ -233,29 +234,29 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
   },
   listBullet: {
-    color: '#6366F1',
+    color: THEME.colors.primaryAccent,
     fontSize: 16,
     width: 14,
     lineHeight: 20,
   },
   listNumber: {
-    color: '#6366F1',
+    color: THEME.colors.primaryAccent,
     fontSize: 13,
     fontWeight: '700',
     width: 22,
     lineHeight: 20,
   },
   listText: {
-    color: '#CBD5E1',
+    color: '#D4D4D8',
     fontSize: 14,
     lineHeight: 20,
     flex: 1,
   },
   codeBlock: {
-    backgroundColor: '#0F172A',
-    borderColor: '#1E293B',
+    backgroundColor: THEME.colors.bgInput,
+    borderColor: THEME.colors.border,
     borderWidth: 1,
-    borderRadius: 8,
+    borderRadius: THEME.radius.sm,
     padding: 12,
     marginVertical: 10,
   },
