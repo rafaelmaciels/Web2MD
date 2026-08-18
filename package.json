@@ -14,6 +14,7 @@
     "mobile:android": "npm --prefix mobile run android",
     "mobile:ios": "npm --prefix mobile run ios",
     "mobile:web": "npm --prefix mobile run web",
+    "mobile:login": "npx eas-cli login",
     "mobile:build:apk": "npm --prefix mobile run build:apk"
   },
   "dependencies": {
