@@ -1,6 +1,6 @@
 import { Share, Alert, Platform } from 'react-native';
 import * as Clipboard from 'expo-clipboard';
-import * as FileSystem from 'expo-file-system';
+import * as FileSystem from 'expo-file-system/legacy';
 import * as Sharing from 'expo-sharing';
 
 export async function copyToClipboard(text: string): Promise<boolean> {
@@ -27,7 +27,7 @@ export async function shareMarkdownFile(markdown: string, filename: string): Pro
 
   try {
     // If running in Expo / React Native environment with FileSystem
-    if (FileSystem.documentDirectory) {
+    if (FileSystem && FileSystem.documentDirectory) {
       const fileUri = `${FileSystem.documentDirectory}${safeFilename}`;
       await FileSystem.writeAsStringAsync(fileUri, markdown, {
         encoding: FileSystem.EncodingType.UTF8,
