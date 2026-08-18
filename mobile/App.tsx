@@ -84,7 +84,7 @@ export default function App() {
             color={activeTab === 'convert' ? '#818CF8' : '#64748B'}
           />
           <Text style={[styles.navLabel, activeTab === 'convert' && styles.navLabelActive]}>
-            Convert
+            Converter
           </Text>
         </TouchableOpacity>
 
@@ -114,7 +114,7 @@ export default function App() {
             color={activeTab === 'history' ? '#818CF8' : '#64748B'}
           />
           <Text style={[styles.navLabel, activeTab === 'history' && styles.navLabelActive]}>
-            History
+            Histórico
           </Text>
         </TouchableOpacity>
 
@@ -129,7 +129,7 @@ export default function App() {
             color={activeTab === 'settings' ? '#818CF8' : '#64748B'}
           />
           <Text style={[styles.navLabel, activeTab === 'settings' && styles.navLabelActive]}>
-            Settings
+            Ajustes
           </Text>
         </TouchableOpacity>
       </View>

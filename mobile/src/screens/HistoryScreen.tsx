@@ -36,12 +36,12 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
 
   function handleClearAll() {
     Alert.alert(
-      'Clear History',
-      'Are you sure you want to delete all saved conversion history?',
+      'Limpar Histórico',
+      'Tem certeza de que deseja apagar todo o histórico de conversões salvas?',
       [
-        { text: 'Cancel', style: 'cancel' },
+        { text: 'Cancelar', style: 'cancel' },
         {
-          text: 'Clear All',
+          text: 'Limpar Tudo',
           style: 'destructive',
           onPress: async () => {
             await clearMobileHistory();
@@ -80,7 +80,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
   function formatDate(iso: string): string {
     try {
       const d = new Date(iso);
-      return d.toLocaleDateString(undefined, {
+      return d.toLocaleDateString('pt-BR', {
         month: 'short',
         day: 'numeric',
         hour: '2-digit',
@@ -95,10 +95,10 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
     <View style={styles.container}>
       {history.length > 0 && (
         <View style={styles.topBar}>
-          <Text style={styles.topBarCount}>{history.length} saved conversions</Text>
+          <Text style={styles.topBarCount}>{history.length} conversões salvas</Text>
           <TouchableOpacity style={styles.clearBtn} onPress={handleClearAll}>
             <Ionicons name="trash-outline" size={13} color="#EF4444" />
-            <Text style={styles.clearBtnText}>Clear All</Text>
+            <Text style={styles.clearBtnText}>Limpar Tudo</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -112,9 +112,9 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
             <View style={styles.emptyIconBadge}>
               <Ionicons name="time-outline" size={32} color="#6366F1" />
             </View>
-            <Text style={styles.emptyTitle}>No Conversions Yet</Text>
+            <Text style={styles.emptyTitle}>Nenhuma Conversão Ainda</Text>
             <Text style={styles.emptyDesc}>
-              Any web pages or notes you convert in Web2MD will automatically appear here for quick access.
+              As páginas da web e notas que você converter no Web2MD aparecerão aqui automaticamente para acesso rápido.
             </Text>
           </View>
         }
@@ -137,11 +137,11 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
               <View style={styles.metaRow}>
                 <View style={styles.metaBadge}>
                   <Ionicons name="document-text-outline" size={11} color="#94A3B8" />
-                  <Text style={styles.metaText}>{item.wordCount} words</Text>
+                  <Text style={styles.metaText}>{item.wordCount} palavras</Text>
                 </View>
                 <View style={styles.metaBadge}>
                   <Ionicons name="time-outline" size={11} color="#94A3B8" />
-                  <Text style={styles.metaText}>{item.readingTimeMinutes} min read</Text>
+                  <Text style={styles.metaText}>{item.readingTimeMinutes} min de leitura</Text>
                 </View>
               </View>
             </TouchableOpacity>

@@ -74,9 +74,9 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
         <View style={styles.emptyIconBadge}>
           <Feather name="edit-3" size={32} color="#6366F1" />
         </View>
-        <Text style={styles.emptyTitle}>No Document Loaded</Text>
+        <Text style={styles.emptyTitle}>Nenhum Documento Carregado</Text>
         <Text style={styles.emptyDesc}>
-          Convert a web URL or paste HTML content in the "Convert" tab to view and edit Markdown here.
+          Converta uma URL da Web ou cole código HTML na aba "Converter" para visualizar e editar o Markdown aqui.
         </Text>
       </View>
     );
@@ -122,7 +122,7 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
           >
             <Ionicons name="eye-outline" size={13} color={activeTab === 'preview' ? '#818CF8' : '#94A3B8'} />
             <Text style={[styles.tabBtnText, activeTab === 'preview' && styles.tabBtnTextActive]}>
-              Preview
+              Prévia
             </Text>
           </TouchableOpacity>
         </View>
@@ -155,7 +155,7 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
               }
             }}
             multiline
-            placeholder="Markdown content will appear here..."
+            placeholder="O conteúdo em Markdown aparecerá aqui..."
             placeholderTextColor="#64748B"
             textAlignVertical="top"
           />
@@ -166,7 +166,7 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
         {copied && (
           <View style={styles.toast}>
             <Ionicons name="checkmark" size={14} color="#10B981" />
-            <Text style={styles.toastText}>Copied to Clipboard!</Text>
+            <Text style={styles.toastText}>Copiado para a Área de Transferência!</Text>
           </View>
         )}
       </View>
@@ -178,7 +178,7 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
             style={styles.filenameInput}
             value={filename}
             onChangeText={setFilename}
-            placeholder="filename.md"
+            placeholder="nome_do_arquivo.md"
             placeholderTextColor="#64748B"
           />
         </View>
@@ -190,13 +190,13 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
             color={copied ? '#10B981' : '#F1F5F9'}
           />
           <Text style={[styles.btnSecondaryText, copied && { color: '#10B981' }]}>
-            {copied ? 'Copied' : 'Copy'}
+            {copied ? 'Copiado' : 'Copiar'}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.btnPrimary} onPress={handleShare} activeOpacity={0.8}>
           <Ionicons name="share-social-outline" size={15} color="#FFFFFF" />
-          <Text style={styles.btnPrimaryText}>Share / Save</Text>
+          <Text style={styles.btnPrimaryText}>Compartilhar / Salvar</Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

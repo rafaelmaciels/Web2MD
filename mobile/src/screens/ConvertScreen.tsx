@@ -31,7 +31,7 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   const sampleUrls = [
-    { title: 'Wikipedia (Markdown)', url: 'https://en.wikipedia.org/wiki/Markdown' },
+    { title: 'Wikipedia (Markdown)', url: 'https://pt.wikipedia.org/wiki/Markdown' },
     { title: 'GitHub Blog', url: 'https://github.blog/news-insights/' },
   ];
 
@@ -51,7 +51,7 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
 
     if (mode === 'url') {
       if (!urlInput.trim()) {
-        setErrorMsg('Please enter or paste a valid web URL.');
+        setErrorMsg('Por favor, digite ou cole uma URL válida.');
         return;
       }
 
@@ -75,11 +75,11 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
         onConversionSuccess(extracted);
       } catch (err: any) {
         setLoading(false);
-        setErrorMsg(err?.message || 'Failed to fetch and convert the web page.');
+        setErrorMsg(err?.message || 'Falha ao buscar e converter a página da web.');
       }
     } else {
       if (!rawInput.trim()) {
-        setErrorMsg('Please paste HTML or text content to convert.');
+        setErrorMsg('Por favor, cole conteúdo HTML ou texto para converter.');
         return;
       }
 
@@ -87,13 +87,13 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
       try {
         let extracted: ExtractedPage;
         if (rawInput.includes('<') && rawInput.includes('>')) {
-          extracted = extractFromHtmlString(rawInput, 'manual://html', 'HTML Input');
+          extracted = extractFromHtmlString(rawInput, 'manual://html', 'Entrada HTML');
           if (rawTitle.trim()) {
             extracted.title = rawTitle.trim();
             extracted.metadata.title = rawTitle.trim();
           }
         } else {
-          extracted = extractFromRawText(rawInput, rawTitle || 'Manual Note');
+          extracted = extractFromRawText(rawInput, rawTitle || 'Nota Manual');
         }
 
         const result = convertToMarkdown(extracted, settings);
@@ -112,7 +112,7 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
         onConversionSuccess(extracted);
       } catch (err: any) {
         setLoading(false);
-        setErrorMsg(err?.message || 'Failed to process manual content.');
+        setErrorMsg(err?.message || 'Falha ao processar o conteúdo manual.');
       }
     }
   }
@@ -135,7 +135,7 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
           >
             <Ionicons name="globe-outline" size={15} color={mode === 'url' ? '#818CF8' : '#64748B'} />
             <Text style={[styles.modeTabText, mode === 'url' && styles.modeTabTextActive]}>
-              Web URL
+              URL da Web
             </Text>
           </TouchableOpacity>
 
@@ -149,7 +149,7 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
           >
             <Ionicons name="code-slash-outline" size={15} color={mode === 'raw' ? '#818CF8' : '#64748B'} />
             <Text style={[styles.modeTabText, mode === 'raw' && styles.modeTabTextActive]}>
-              HTML / Text
+              HTML / Texto
             </Text>
           </TouchableOpacity>
         </View>
@@ -157,12 +157,12 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
         {/* URL Mode */}
         {mode === 'url' ? (
           <View style={styles.card}>
-            <Text style={styles.inputLabel}>Enter Web Article URL</Text>
+            <Text style={styles.inputLabel}>Digite a URL da Página ou Artigo</Text>
             <View style={styles.inputRow}>
               <Ionicons name="globe-outline" size={18} color="#64748B" style={styles.inputIcon} />
               <TextInput
                 style={styles.textInput}
-                placeholder="https://example.com/article..."
+                placeholder="https://exemplo.com/artigo..."
                 placeholderTextColor="#64748B"
                 value={urlInput}
                 onChangeText={setUrlInput}
@@ -174,13 +174,13 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
               />
               <TouchableOpacity style={styles.pasteBtn} onPress={handlePaste} activeOpacity={0.7}>
                 <Ionicons name="clipboard-outline" size={14} color="#A5B4FC" />
-                <Text style={styles.pasteBtnText}>Paste</Text>
+                <Text style={styles.pasteBtnText}>Colar</Text>
               </TouchableOpacity>
             </View>
 
             {/* Quick Samples */}
             <View style={styles.samplesSection}>
-              <Text style={styles.samplesLabel}>Quick Samples:</Text>
+              <Text style={styles.samplesLabel}>Exemplos Rápidos:</Text>
               <View style={styles.sampleChips}>
                 {sampleUrls.map((s, idx) => (
                   <TouchableOpacity
@@ -198,25 +198,25 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
         ) : (
           /* Raw HTML / Text Mode */
           <View style={styles.card}>
-            <Text style={styles.inputLabel}>Document Title (Optional)</Text>
+            <Text style={styles.inputLabel}>Título do Documento (Opcional)</Text>
             <TextInput
               style={[styles.textInput, styles.titleInput]}
-              placeholder="e.g. My Saved Note"
+              placeholder="Ex: Minha Anotação Salva"
               placeholderTextColor="#64748B"
               value={rawTitle}
               onChangeText={setRawTitle}
             />
 
             <View style={styles.rawHeaderRow}>
-              <Text style={styles.inputLabel}>Paste HTML or Text Content</Text>
+              <Text style={styles.inputLabel}>Cole o Conteúdo em HTML ou Texto</Text>
               <TouchableOpacity style={styles.pasteBtnSmall} onPress={handlePaste}>
                 <Ionicons name="clipboard-outline" size={12} color="#A5B4FC" />
-                <Text style={styles.pasteBtnTextSmall}>Paste</Text>
+                <Text style={styles.pasteBtnTextSmall}>Colar</Text>
               </TouchableOpacity>
             </View>
             <TextInput
               style={[styles.textInput, styles.textArea]}
-              placeholder="Paste HTML tags or raw text here..."
+              placeholder="Cole tags HTML ou texto bruto aqui..."
               placeholderTextColor="#64748B"
               value={rawInput}
               onChangeText={setRawInput}
@@ -246,7 +246,7 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
           ) : (
             <>
               <Ionicons name="sparkles" size={17} color="#FFFFFF" />
-              <Text style={styles.convertBtnText}>Convert to Markdown</Text>
+              <Text style={styles.convertBtnText}>Converter para Markdown</Text>
               <Ionicons name="arrow-forward" size={17} color="#FFFFFF" />
             </>
           )}
@@ -254,22 +254,22 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
 
         {/* Feature Highlights Card */}
         <View style={styles.featuresCard}>
-          <Text style={styles.featuresTitle}>What Web2MD does automatically:</Text>
+          <Text style={styles.featuresTitle}>O que o Web2MD faz automaticamente:</Text>
           <View style={styles.featureItem}>
             <Text style={styles.featureCheck}>✓</Text>
-            <Text style={styles.featureText}>Cleans clutter, ads, navigation bars, and modals</Text>
+            <Text style={styles.featureText}>Remove poluição visual, anúncios, menus de navegação e popups</Text>
           </View>
           <View style={styles.featureItem}>
             <Text style={styles.featureCheck}>✓</Text>
-            <Text style={styles.featureText}>Extracts YAML Frontmatter metadata (Author, URL, Date)</Text>
+            <Text style={styles.featureText}>Extrai cabeçalho YAML Frontmatter com metadados (Autor, URL, Data)</Text>
           </View>
           <View style={styles.featureItem}>
             <Text style={styles.featureCheck}>✓</Text>
-            <Text style={styles.featureText}>Formats Tables, Code Blocks with syntax & Lists (GFM)</Text>
+            <Text style={styles.featureText}>Formata Tabelas, Blocos de Código com sintaxe e Listas (GFM)</Text>
           </View>
           <View style={styles.featureItem}>
             <Text style={styles.featureCheck}>✓</Text>
-            <Text style={styles.featureText}>Calculates reading time, word count & character metrics</Text>
+            <Text style={styles.featureText}>Calcula tempo estimado de leitura, contagem de palavras e caracteres</Text>
           </View>
         </View>
       </ScrollView>

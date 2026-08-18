@@ -15,19 +15,19 @@ export const StatsBar: React.FC<StatsBarProps> = ({ result }) => {
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.scrollContent}>
         <View style={styles.statItem}>
           <Ionicons name="document-text-outline" size={13} color="#818CF8" />
-          <Text style={styles.statLabel}>Words:</Text>
+          <Text style={styles.statLabel}>Palavras:</Text>
           <Text style={styles.statValue}>{result.wordCount}</Text>
         </View>
 
         <View style={styles.statItem}>
           <Ionicons name="code-slash-outline" size={13} color="#34D399" />
-          <Text style={styles.statLabel}>Chars:</Text>
+          <Text style={styles.statLabel}>Caracteres:</Text>
           <Text style={styles.statValue}>{result.charCount}</Text>
         </View>
 
         <View style={styles.statItem}>
           <Ionicons name="time-outline" size={13} color="#FBBF24" />
-          <Text style={styles.statLabel}>Time:</Text>
+          <Text style={styles.statLabel}>Tempo:</Text>
           <Text style={styles.statValue}>{result.readingTimeMinutes} min</Text>
         </View>
 

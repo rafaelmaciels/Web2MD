@@ -9,7 +9,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ markdown }) => {
   if (!markdown) {
     return (
       <View style={styles.emptyContainer}>
-        <Text style={styles.emptyText}>No Markdown content to preview.</Text>
+        <Text style={styles.emptyText}>Nenhum conteúdo Markdown para visualizar.</Text>
       </View>
     );
   }
@@ -35,7 +35,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ markdown }) => {
         inFrontmatter = false;
         elements.push(
           <View key={`frontmatter-${i}`} style={styles.frontmatterCard}>
-            <Text style={styles.frontmatterTag}>YAML METADATA</Text>
+            <Text style={styles.frontmatterTag}>METADADOS YAML</Text>
             {frontmatterBuffer.map((fLine, fIdx) => (
               <Text key={`fline-${fIdx}`} style={styles.frontmatterText}>
                 {fLine}
@@ -53,7 +53,6 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ markdown }) => {
     // Code block handling
     if (line.startsWith('```') || line.startsWith('~~~')) {
       if (inCodeBlock) {
-        // End of code block
         inCodeBlock = false;
         elements.push(
           <View key={`code-${i}`} style={styles.codeBlock}>

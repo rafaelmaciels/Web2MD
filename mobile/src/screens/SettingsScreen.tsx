@@ -42,15 +42,15 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {saved && (
         <View style={styles.saveBadge}>
           <Ionicons name="checkmark" size={13} color="#10B981" />
-          <Text style={styles.saveBadgeText}>Preference saved</Text>
+          <Text style={styles.saveBadgeText}>Preferência salva com sucesso</Text>
         </View>
       )}
 
       {/* Header Info */}
       <View style={styles.headerBox}>
-        <Text style={styles.headerTitle}>Conversion Preferences</Text>
+        <Text style={styles.headerTitle}>Preferências de Conversão</Text>
         <Text style={styles.headerDesc}>
-          Settings apply directly to both URL extractions and raw Markdown outputs on your smartphone.
+          As configurações são aplicadas diretamente às extrações de URLs e saídas de Markdown no seu smartphone.
         </Text>
       </View>
 
@@ -58,14 +58,14 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
           <Ionicons name="options-outline" size={16} color="#818CF8" />
-          <Text style={styles.sectionTitle}>Content & Metadata Defaults</Text>
+          <Text style={styles.sectionTitle}>Padrões de Conteúdo e Metadados</Text>
         </View>
 
         <View style={styles.row}>
           <View style={styles.rowInfo}>
-            <Text style={styles.rowLabel}>Include YAML Frontmatter</Text>
+            <Text style={styles.rowLabel}>Incluir YAML Frontmatter</Text>
             <Text style={styles.rowDesc}>
-              Adds title, URL, date, author, domain metadata header at top of file
+              Adiciona cabeçalho com título, URL, data, autor e domínio no topo do arquivo
             </Text>
           </View>
           <Switch
@@ -80,9 +80,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         <View style={styles.row}>
           <View style={styles.rowInfo}>
-            <Text style={styles.rowLabel}>Include Images</Text>
+            <Text style={styles.rowLabel}>Incluir Imagens</Text>
             <Text style={styles.rowDesc}>
-              Converts HTML `img` tags into Markdown `![alt](url)`
+              Converte tags HTML &lt;img&gt; na sintaxe Markdown ![alt](url)
             </Text>
           </View>
           <Switch
@@ -97,9 +97,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         <View style={styles.row}>
           <View style={styles.rowInfo}>
-            <Text style={styles.rowLabel}>Include Hyperlinks</Text>
+            <Text style={styles.rowLabel}>Incluir Hiperlinks</Text>
             <Text style={styles.rowDesc}>
-              Converts HTML `a` tags into Markdown `[anchor](url)`
+              Converte links HTML &lt;a&gt; na sintaxe Markdown [texto](url)
             </Text>
           </View>
           <Switch
@@ -115,12 +115,12 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
           <Ionicons name="code-slash-outline" size={16} color="#34D399" />
-          <Text style={styles.sectionTitle}>Markdown Syntax Styling</Text>
+          <Text style={styles.sectionTitle}>Estilo de Sintaxe Markdown</Text>
         </View>
 
         {/* Heading Style */}
         <View style={styles.optionBlock}>
-          <Text style={styles.rowLabel}>Heading Style</Text>
+          <Text style={styles.rowLabel}>Estilo de Títulos</Text>
           <View style={styles.pillGroup}>
             <TouchableOpacity
               style={[
@@ -135,7 +135,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   localSettings.headingStyle === 'atx' && styles.pillTextActive,
                 ]}
               >
-                ATX (# Heading)
+                ATX (# Título)
               </Text>
             </TouchableOpacity>
 
@@ -152,7 +152,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   localSettings.headingStyle === 'setext' && styles.pillTextActive,
                 ]}
               >
-                Setext (Underline)
+                Setext (Sublinhado)
               </Text>
             </TouchableOpacity>
           </View>
@@ -162,7 +162,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         {/* Bullet List Marker */}
         <View style={styles.optionBlock}>
-          <Text style={styles.rowLabel}>Bullet List Marker</Text>
+          <Text style={styles.rowLabel}>Marcador de Lista Não-Ordenada</Text>
           <View style={styles.pillGroup}>
             {(['-', '*', '+'] as const).map((marker) => (
               <TouchableOpacity
@@ -190,7 +190,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         {/* Code Block Fence */}
         <View style={styles.optionBlock}>
-          <Text style={styles.rowLabel}>Code Block Fence</Text>
+          <Text style={styles.rowLabel}>Delimitador de Blocos de Código</Text>
           <View style={styles.pillGroup}>
             {(['```', '~~~'] as const).map((fence) => (
               <TouchableOpacity
@@ -219,13 +219,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
           <Ionicons name="folder-outline" size={16} color="#FBBF24" />
-          <Text style={styles.sectionTitle}>Export & Storage Rules</Text>
+          <Text style={styles.sectionTitle}>Regras de Exportação e Armazenamento</Text>
         </View>
 
         <View style={styles.optionBlock}>
-          <Text style={styles.rowLabel}>Default Subfolder</Text>
+          <Text style={styles.rowLabel}>Subpasta Padrão</Text>
           <Text style={styles.rowDesc}>
-            Used when saving or categorizing exported markdown files
+            Usada para salvar ou categorizar os arquivos Markdown exportados
           </Text>
           <TextInput
             style={styles.folderInput}
@@ -241,7 +241,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       <View style={styles.ecosystemCard}>
         <View style={styles.sectionHeader}>
           <Ionicons name="shield-checkmark-outline" size={16} color="#60A5FA" />
-          <Text style={styles.sectionTitle}>Web2MD Multiplatform Ecosystem</Text>
+          <Text style={styles.sectionTitle}>Ecossistema Multiplataforma Web2MD</Text>
         </View>
 
         <View style={styles.platformRow}>
@@ -249,11 +249,11 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <Ionicons name="logo-chrome" size={18} color="#38BDF8" />
           </View>
           <View style={styles.platformTextCol}>
-            <Text style={styles.platformTitle}>Chrome Extension</Text>
-            <Text style={styles.platformSubtitle}>Active on Desktop / Manifest v3</Text>
+            <Text style={styles.platformTitle}>Extensão Chrome</Text>
+            <Text style={styles.platformSubtitle}>Ativa no Desktop / Manifest v3</Text>
           </View>
           <View style={styles.badgeActive}>
-            <Text style={styles.badgeActiveText}>Active</Text>
+            <Text style={styles.badgeActiveText}>Ativo</Text>
           </View>
         </View>
 
@@ -262,15 +262,18 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <Ionicons name="phone-portrait-outline" size={18} color="#818CF8" />
           </View>
           <View style={styles.platformTextCol}>
-            <Text style={styles.platformTitle}>Mobile Smartphone App</Text>
-            <Text style={styles.platformSubtitle}>Native React Native & Expo Engine</Text>
+            <Text style={styles.platformTitle}>Aplicativo Mobile</Text>
+            <Text style={styles.platformSubtitle}>Motor Nativo React Native & Expo</Text>
           </View>
           <View style={styles.badgeActive}>
-            <Text style={styles.badgeActiveText}>Active</Text>
+            <Text style={styles.badgeActiveText}>Ativo</Text>
           </View>
         </View>
 
-        <Text style={styles.versionFooter}>Web2MD Unified Core Engine v1.0.0</Text>
+        <View style={styles.footerBrandContainer}>
+          <Text style={styles.versionFooter}>Web2MD Unified Core Engine v1.0.0</Text>
+          <Text style={styles.authorFooter}>Desenvolvido com ♥ por Rafael Maciel</Text>
+        </View>
       </View>
     </ScrollView>
   );
@@ -455,10 +458,20 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
   },
+  footerBrandContainer: {
+    marginTop: 16,
+    alignItems: 'center',
+    gap: 4,
+  },
   versionFooter: {
     color: '#475569',
     fontSize: 11,
-    textAlign: 'center',
-    marginTop: 14,
+    fontWeight: '500',
+  },
+  authorFooter: {
+    color: '#818CF8',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.2,
   },
 });

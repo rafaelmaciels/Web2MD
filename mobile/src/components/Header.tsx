@@ -22,7 +22,7 @@ export const Header: React.FC<HeaderProps> = ({ onRefresh, onOpenSettings }) => 
               <Text style={styles.versionText}>v1.0</Text>
             </View>
           </View>
-          <Text style={styles.brandSubtitle}>Web to Markdown Engine</Text>
+          <Text style={styles.brandSubtitle}>Conversor Web para Markdown</Text>
         </View>
       </View>
 
