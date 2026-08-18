@@ -7,15 +7,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import {
-  History,
-  FileText,
-  Trash2,
-  Copy,
-  ExternalLink,
-  Clock,
-  Check,
-} from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ConversionHistoryItem, ExtractedPage } from '../types';
 import { getMobileHistory, deleteHistoryItem, clearMobileHistory } from '../services/storage';
 import { copyToClipboard } from '../services/exporter';
@@ -105,7 +97,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
         <View style={styles.topBar}>
           <Text style={styles.topBarCount}>{history.length} saved conversions</Text>
           <TouchableOpacity style={styles.clearBtn} onPress={handleClearAll}>
-            <Trash2 size={13} color="#EF4444" />
+            <Ionicons name="trash-outline" size={13} color="#EF4444" />
             <Text style={styles.clearBtnText}>Clear All</Text>
           </TouchableOpacity>
         </View>
@@ -118,7 +110,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
             <View style={styles.emptyIconBadge}>
-              <History size={32} color="#6366F1" />
+              <Ionicons name="time-outline" size={32} color="#6366F1" />
             </View>
             <Text style={styles.emptyTitle}>No Conversions Yet</Text>
             <Text style={styles.emptyDesc}>
@@ -144,11 +136,11 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
 
               <View style={styles.metaRow}>
                 <View style={styles.metaBadge}>
-                  <FileText size={11} color="#94A3B8" />
+                  <Ionicons name="document-text-outline" size={11} color="#94A3B8" />
                   <Text style={styles.metaText}>{item.wordCount} words</Text>
                 </View>
                 <View style={styles.metaBadge}>
-                  <Clock size={11} color="#94A3B8" />
+                  <Ionicons name="time-outline" size={11} color="#94A3B8" />
                   <Text style={styles.metaText}>{item.readingTimeMinutes} min read</Text>
                 </View>
               </View>
@@ -160,11 +152,11 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
                 onPress={() => handleCopy(item)}
                 activeOpacity={0.7}
               >
-                {copiedId === item.id ? (
-                  <Check size={14} color="#10B981" />
-                ) : (
-                  <Copy size={14} color="#94A3B8" />
-                )}
+                <Ionicons
+                  name={copiedId === item.id ? 'checkmark' : 'copy-outline'}
+                  size={14}
+                  color={copiedId === item.id ? '#10B981' : '#94A3B8'}
+                />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -172,7 +164,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
                 onPress={() => handleOpen(item)}
                 activeOpacity={0.7}
               >
-                <ExternalLink size={14} color="#818CF8" />
+                <Ionicons name="open-outline" size={14} color="#818CF8" />
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -180,7 +172,7 @@ export const HistoryScreen: React.FC<HistoryScreenProps> = ({ onSelectItem }) =>
                 onPress={() => handleDelete(item.id)}
                 activeOpacity={0.7}
               >
-                <Trash2 size={14} color="#EF4444" />
+                <Ionicons name="trash-outline" size={14} color="#EF4444" />
               </TouchableOpacity>
             </View>
           </View>

@@ -7,11 +7,10 @@ import {
   StyleSheet,
   ScrollView,
   ActivityIndicator,
-  Alert,
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { Globe, Clipboard, ArrowRight, Sparkles, FileText, Code } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { ExtractedPage, UserSettings } from '../types';
 import { fetchAndExtractUrl, extractFromHtmlString, extractFromRawText } from '../services/fetcher';
 import { pasteFromClipboard } from '../services/exporter';
@@ -134,7 +133,7 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
             }}
             activeOpacity={0.8}
           >
-            <Globe size={15} color={mode === 'url' ? '#818CF8' : '#64748B'} />
+            <Ionicons name="globe-outline" size={15} color={mode === 'url' ? '#818CF8' : '#64748B'} />
             <Text style={[styles.modeTabText, mode === 'url' && styles.modeTabTextActive]}>
               Web URL
             </Text>
@@ -148,7 +147,7 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
             }}
             activeOpacity={0.8}
           >
-            <Code size={15} color={mode === 'raw' ? '#818CF8' : '#64748B'} />
+            <Ionicons name="code-slash-outline" size={15} color={mode === 'raw' ? '#818CF8' : '#64748B'} />
             <Text style={[styles.modeTabText, mode === 'raw' && styles.modeTabTextActive]}>
               HTML / Text
             </Text>
@@ -160,7 +159,7 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
           <View style={styles.card}>
             <Text style={styles.inputLabel}>Enter Web Article URL</Text>
             <View style={styles.inputRow}>
-              <Globe size={18} color="#64748B" style={styles.inputIcon} />
+              <Ionicons name="globe-outline" size={18} color="#64748B" style={styles.inputIcon} />
               <TextInput
                 style={styles.textInput}
                 placeholder="https://example.com/article..."
@@ -174,7 +173,7 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
                 onSubmitEditing={handleConvert}
               />
               <TouchableOpacity style={styles.pasteBtn} onPress={handlePaste} activeOpacity={0.7}>
-                <Clipboard size={14} color="#A5B4FC" />
+                <Ionicons name="clipboard-outline" size={14} color="#A5B4FC" />
                 <Text style={styles.pasteBtnText}>Paste</Text>
               </TouchableOpacity>
             </View>
@@ -211,7 +210,7 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
             <View style={styles.rawHeaderRow}>
               <Text style={styles.inputLabel}>Paste HTML or Text Content</Text>
               <TouchableOpacity style={styles.pasteBtnSmall} onPress={handlePaste}>
-                <Clipboard size={12} color="#A5B4FC" />
+                <Ionicons name="clipboard-outline" size={12} color="#A5B4FC" />
                 <Text style={styles.pasteBtnTextSmall}>Paste</Text>
               </TouchableOpacity>
             </View>
@@ -246,9 +245,9 @@ export const ConvertScreen: React.FC<ConvertScreenProps> = ({ settings, onConver
             <ActivityIndicator size="small" color="#FFFFFF" />
           ) : (
             <>
-              <Sparkles size={18} color="#FFFFFF" />
+              <Ionicons name="sparkles" size={17} color="#FFFFFF" />
               <Text style={styles.convertBtnText}>Convert to Markdown</Text>
-              <ArrowRight size={18} color="#FFFFFF" />
+              <Ionicons name="arrow-forward" size={17} color="#FFFFFF" />
             </>
           )}
         </TouchableOpacity>
@@ -307,10 +306,6 @@ const styles = StyleSheet.create({
   },
   modeTabActive: {
     backgroundColor: '#1E293B',
-    shadowColor: '#000',
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 2,
   },
   modeTabText: {
     color: '#64748B',
@@ -458,11 +453,6 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     paddingVertical: 14,
     gap: 8,
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 4,
     marginBottom: 20,
   },
   convertBtnDisabled: {

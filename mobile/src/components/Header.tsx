@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Globe, RefreshCw, Settings as SettingsIcon } from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 
 interface HeaderProps {
   onRefresh?: () => void;
@@ -8,7 +8,7 @@ interface HeaderProps {
   activeTabTitle?: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onRefresh, onOpenSettings, activeTabTitle }) => {
+export const Header: React.FC<HeaderProps> = ({ onRefresh, onOpenSettings }) => {
   return (
     <View style={styles.header}>
       <View style={styles.brandRow}>
@@ -29,12 +29,12 @@ export const Header: React.FC<HeaderProps> = ({ onRefresh, onOpenSettings, activ
       <View style={styles.actions}>
         {onRefresh && (
           <TouchableOpacity style={styles.actionBtn} onPress={onRefresh} activeOpacity={0.7}>
-            <RefreshCw size={18} color="#94A3B8" />
+            <Ionicons name="refresh-outline" size={18} color="#94A3B8" />
           </TouchableOpacity>
         )}
         {onOpenSettings && (
           <TouchableOpacity style={styles.actionBtn} onPress={onOpenSettings} activeOpacity={0.7}>
-            <SettingsIcon size={18} color="#94A3B8" />
+            <Ionicons name="settings-outline" size={18} color="#94A3B8" />
           </TouchableOpacity>
         )}
       </View>
@@ -65,11 +65,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#6366F1',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.35,
-    shadowRadius: 6,
-    elevation: 4,
   },
   iconText: {
     color: '#FFFFFF',

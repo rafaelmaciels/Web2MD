@@ -1,7 +1,6 @@
-import React, { useState, useEffect, Component, ErrorInfo, ReactNode } from 'react';
-import { View, StyleSheet, TouchableOpacity, Text, StatusBar, Platform, ScrollView } from 'react-native';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { Sparkles, Edit3, History as HistoryIcon, Settings as SettingsIcon, AlertCircle, RefreshCw } from 'lucide-react-native';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, TouchableOpacity, Text, StatusBar, Platform, SafeAreaView } from 'react-native';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { ExtractedPage, UserSettings, DEFAULT_SETTINGS } from './src/types';
 import { getMobileSettings } from './src/services/storage';
 import { Header } from './src/components/Header';
@@ -12,52 +11,7 @@ import { SettingsScreen } from './src/screens/SettingsScreen';
 
 type TabType = 'convert' | 'editor' | 'history' | 'settings';
 
-interface ErrorBoundaryProps {
-  children: ReactNode;
-}
-
-interface ErrorBoundaryState {
-  hasError: boolean;
-  error: Error | null;
-}
-
-class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
-  state: ErrorBoundaryState = { hasError: false, error: null };
-
-  static getDerivedStateFromError(error: Error): ErrorBoundaryState {
-    return { hasError: true, error };
-  }
-
-  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error('[Web2MD Mobile Crash]', error, errorInfo);
-  }
-
-  render() {
-    if (this.state.hasError) {
-      return (
-        <View style={styles.errorContainer}>
-          <AlertCircle size={48} color="#EF4444" />
-          <Text style={styles.errorTitle}>Something went wrong</Text>
-          <ScrollView style={styles.errorScroll}>
-            <Text style={styles.errorDetail}>
-              {this.state.error?.message || 'Unknown error occurred'}
-            </Text>
-          </ScrollView>
-          <TouchableOpacity
-            style={styles.retryBtn}
-            onPress={() => this.setState({ hasError: false, error: null })}
-          >
-            <RefreshCw size={16} color="#FFFFFF" />
-            <Text style={styles.retryBtnText}>Reload Web2MD</Text>
-          </TouchableOpacity>
-        </View>
-      );
-    }
-    return this.props.children;
-  }
-}
-
-function MainApp() {
+export default function App() {
   const [activeTab, setActiveTab] = useState<TabType>('convert');
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [extractedPage, setExtractedPage] = useState<ExtractedPage | null>(null);
@@ -79,8 +33,8 @@ function MainApp() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['top', 'left', 'right', 'bottom']}>
-      <StatusBar barStyle="light-content" backgroundColor="#0B0F19" />
+    <SafeAreaView style={styles.safeArea}>
+      <StatusBar barStyle="light-content" backgroundColor="#0F172A" />
 
       {/* Top Brand Header */}
       <Header
@@ -124,7 +78,8 @@ function MainApp() {
           onPress={() => setActiveTab('convert')}
           activeOpacity={0.7}
         >
-          <Sparkles
+          <Ionicons
+            name={activeTab === 'convert' ? 'sparkles' : 'sparkles-outline'}
             size={20}
             color={activeTab === 'convert' ? '#818CF8' : '#64748B'}
           />
@@ -138,7 +93,8 @@ function MainApp() {
           onPress={() => setActiveTab('editor')}
           activeOpacity={0.7}
         >
-          <Edit3
+          <Feather
+            name="edit-3"
             size={20}
             color={activeTab === 'editor' ? '#818CF8' : '#64748B'}
           />
@@ -152,7 +108,8 @@ function MainApp() {
           onPress={() => setActiveTab('history')}
           activeOpacity={0.7}
         >
-          <HistoryIcon
+          <Ionicons
+            name={activeTab === 'history' ? 'time' : 'time-outline'}
             size={20}
             color={activeTab === 'history' ? '#818CF8' : '#64748B'}
           />
@@ -166,7 +123,8 @@ function MainApp() {
           onPress={() => setActiveTab('settings')}
           activeOpacity={0.7}
         >
-          <SettingsIcon
+          <Ionicons
+            name={activeTab === 'settings' ? 'settings' : 'settings-outline'}
             size={20}
             color={activeTab === 'settings' ? '#818CF8' : '#64748B'}
           />
@@ -179,20 +137,11 @@ function MainApp() {
   );
 }
 
-export default function App() {
-  return (
-    <SafeAreaProvider>
-      <ErrorBoundary>
-        <MainApp />
-      </ErrorBoundary>
-    </SafeAreaProvider>
-  );
-}
-
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#0B0F19',
+    backgroundColor: '#0F172A',
+    paddingTop: Platform.OS === 'android' ? (StatusBar.currentHeight || 28) : 0,
   },
   content: {
     flex: 1,
@@ -220,47 +169,6 @@ const styles = StyleSheet.create({
   },
   navLabelActive: {
     color: '#818CF8',
-    fontWeight: '700',
-  },
-  errorContainer: {
-    flex: 1,
-    backgroundColor: '#090D16',
-    alignItems: 'center',
-    justifyContent: 'center',
-    padding: 24,
-  },
-  errorTitle: {
-    color: '#F8FAFC',
-    fontSize: 18,
-    fontWeight: '700',
-    marginTop: 14,
-    marginBottom: 8,
-  },
-  errorScroll: {
-    maxHeight: 180,
-    backgroundColor: '#1E1B4B',
-    borderRadius: 8,
-    padding: 12,
-    marginVertical: 14,
-    width: '100%',
-  },
-  errorDetail: {
-    color: '#E0E7FF',
-    fontSize: 12,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
-  },
-  retryBtn: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#6366F1',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-    gap: 8,
-  },
-  retryBtnText: {
-    color: '#FFFFFF',
-    fontSize: 14,
     fontWeight: '700',
   },
 });

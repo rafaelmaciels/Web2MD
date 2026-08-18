@@ -7,18 +7,8 @@ import {
   StyleSheet,
   ScrollView,
   Switch,
-  Alert,
 } from 'react-native';
-import {
-  Sliders,
-  FileCode,
-  FolderDown,
-  Info,
-  Check,
-  Shield,
-  Smartphone,
-  Chrome,
-} from 'lucide-react-native';
+import { Ionicons } from '@expo/vector-icons';
 import { UserSettings } from '../types';
 import { saveMobileSettings } from '../services/storage';
 
@@ -51,7 +41,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Toast */}
       {saved && (
         <View style={styles.saveBadge}>
-          <Check size={13} color="#10B981" />
+          <Ionicons name="checkmark" size={13} color="#10B981" />
           <Text style={styles.saveBadgeText}>Preference saved</Text>
         </View>
       )}
@@ -67,7 +57,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Section 1: Content & Metadata */}
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
-          <Sliders size={16} color="#818CF8" />
+          <Ionicons name="options-outline" size={16} color="#818CF8" />
           <Text style={styles.sectionTitle}>Content & Metadata Defaults</Text>
         </View>
 
@@ -124,7 +114,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Section 2: Markdown Syntax Styling */}
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
-          <FileCode size={16} color="#34D399" />
+          <Ionicons name="code-slash-outline" size={16} color="#34D399" />
           <Text style={styles.sectionTitle}>Markdown Syntax Styling</Text>
         </View>
 
@@ -228,7 +218,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Section 3: Subfolder / Export */}
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
-          <FolderDown size={16} color="#FBBF24" />
+          <Ionicons name="folder-outline" size={16} color="#FBBF24" />
           <Text style={styles.sectionTitle}>Export & Storage Rules</Text>
         </View>
 
@@ -250,13 +240,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {/* Section 4: Ecosystem & Platform Info */}
       <View style={styles.ecosystemCard}>
         <View style={styles.sectionHeader}>
-          <Shield size={16} color="#60A5FA" />
+          <Ionicons name="shield-checkmark-outline" size={16} color="#60A5FA" />
           <Text style={styles.sectionTitle}>Web2MD Multiplatform Ecosystem</Text>
         </View>
 
         <View style={styles.platformRow}>
           <View style={styles.platformIconBox}>
-            <Chrome size={18} color="#38BDF8" />
+            <Ionicons name="logo-chrome" size={18} color="#38BDF8" />
           </View>
           <View style={styles.platformTextCol}>
             <Text style={styles.platformTitle}>Chrome Extension</Text>
@@ -269,7 +259,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         <View style={styles.platformRow}>
           <View style={styles.platformIconBox}>
-            <Smartphone size={18} color="#818CF8" />
+            <Ionicons name="phone-portrait-outline" size={18} color="#818CF8" />
           </View>
           <View style={styles.platformTextCol}>
             <Text style={styles.platformTitle}>Mobile Smartphone App</Text>

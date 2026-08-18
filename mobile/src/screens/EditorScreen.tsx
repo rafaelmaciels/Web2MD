@@ -7,17 +7,8 @@ import {
   StyleSheet,
   KeyboardAvoidingView,
   Platform,
-  Alert,
 } from 'react-native';
-import {
-  Edit3,
-  Eye,
-  Copy,
-  Share2,
-  Check,
-  Globe,
-  Download,
-} from 'lucide-react-native';
+import { Ionicons, Feather } from '@expo/vector-icons';
 import { ConversionResult, ExtractedPage, UserSettings } from '../types';
 import { convertToMarkdown } from '../core/markdown';
 import { StatsBar } from '../components/StatsBar';
@@ -81,7 +72,7 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
     return (
       <View style={styles.emptyContainer}>
         <View style={styles.emptyIconBadge}>
-          <Edit3 size={32} color="#6366F1" />
+          <Feather name="edit-3" size={32} color="#6366F1" />
         </View>
         <Text style={styles.emptyTitle}>No Document Loaded</Text>
         <Text style={styles.emptyDesc}>
@@ -98,7 +89,7 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
     >
       {/* URL & Domain Bar */}
       <View style={styles.urlBar}>
-        <Globe size={13} color="#818CF8" />
+        <Ionicons name="globe-outline" size={13} color="#818CF8" />
         <Text style={styles.urlDomain} numberOfLines={1}>
           {extracted.domain}
         </Text>
@@ -118,7 +109,7 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
             onPress={() => setActiveTab('editor')}
             activeOpacity={0.7}
           >
-            <Edit3 size={13} color={activeTab === 'editor' ? '#818CF8' : '#94A3B8'} />
+            <Feather name="edit-3" size={13} color={activeTab === 'editor' ? '#818CF8' : '#94A3B8'} />
             <Text style={[styles.tabBtnText, activeTab === 'editor' && styles.tabBtnTextActive]}>
               Editor
             </Text>
@@ -129,7 +120,7 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
             onPress={() => setActiveTab('preview')}
             activeOpacity={0.7}
           >
-            <Eye size={13} color={activeTab === 'preview' ? '#818CF8' : '#94A3B8'} />
+            <Ionicons name="eye-outline" size={13} color={activeTab === 'preview' ? '#818CF8' : '#94A3B8'} />
             <Text style={[styles.tabBtnText, activeTab === 'preview' && styles.tabBtnTextActive]}>
               Preview
             </Text>
@@ -152,7 +143,6 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
             value={customMarkdown}
             onChangeText={(txt) => {
               setCustomMarkdown(txt);
-              // Recalculate word counts locally
               const words = txt.match(/\S+/g) || [];
               if (result) {
                 setResult({
@@ -175,7 +165,7 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
 
         {copied && (
           <View style={styles.toast}>
-            <Check size={14} color="#10B981" />
+            <Ionicons name="checkmark" size={14} color="#10B981" />
             <Text style={styles.toastText}>Copied to Clipboard!</Text>
           </View>
         )}
@@ -194,14 +184,18 @@ export const EditorScreen: React.FC<EditorScreenProps> = ({
         </View>
 
         <TouchableOpacity style={styles.btnSecondary} onPress={handleCopy} activeOpacity={0.7}>
-          {copied ? <Check size={15} color="#10B981" /> : <Copy size={15} color="#F1F5F9" />}
+          <Ionicons
+            name={copied ? 'checkmark' : 'copy-outline'}
+            size={15}
+            color={copied ? '#10B981' : '#F1F5F9'}
+          />
           <Text style={[styles.btnSecondaryText, copied && { color: '#10B981' }]}>
             {copied ? 'Copied' : 'Copy'}
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.btnPrimary} onPress={handleShare} activeOpacity={0.8}>
-          <Share2 size={15} color="#FFFFFF" />
+          <Ionicons name="share-social-outline" size={15} color="#FFFFFF" />
           <Text style={styles.btnPrimaryText}>Share / Save</Text>
         </TouchableOpacity>
       </View>
@@ -328,10 +322,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     borderRadius: 20,
     gap: 6,
-    shadowColor: '#000',
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 6,
   },
   toastText: {
     color: '#6EE7B7',
@@ -387,11 +377,6 @@ const styles = StyleSheet.create({
     height: 38,
     borderRadius: 8,
     gap: 6,
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-    elevation: 3,
   },
   btnPrimaryText: {
     color: '#FFFFFF',
