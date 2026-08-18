@@ -6,3 +6,7 @@ Thumbs.db
 .env
 .env.local
 .vite/
+.expo/
+.expo-shared/
+web-build/
+*.tsbuildinfo
