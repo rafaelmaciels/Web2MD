@@ -1,8 +1,10 @@
+import { Platform } from 'react-native';
 import { ExtractedPage, ArticleMetadata } from '../types';
 
 /**
  * Mobile Article Fetcher & Content Extractor
  * Fetches remote HTML, strips noise, parses metadata and extracts main article content.
+ * Includes CORS proxy fallback when running in Web browser preview.
  */
 
 export async function fetchAndExtractUrl(targetUrl: string): Promise<ExtractedPage> {
@@ -20,21 +22,66 @@ export async function fetchAndExtractUrl(targetUrl: string): Promise<ExtractedPa
     domain = validUrl;
   }
 
-  // Fetch HTML content with standard browser user-agent headers
-  const response = await fetch(validUrl, {
-    method: 'GET',
-    headers: {
-      'User-Agent':
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Mobile/15E148 Safari/604.1',
-      Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
-    },
-  });
+  let rawHtml = '';
+  let lastError: Error | null = null;
 
-  if (!response.ok) {
-    throw new Error(`Failed to load page: HTTP ${response.status} (${response.statusText})`);
+  // On Web preview, standard fetch is blocked by browser CORS policy.
+  // Use public CORS proxies when on Web platform.
+  if (Platform.OS === 'web') {
+    const proxies = [
+      (url: string) => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+      (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+      (url: string) => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+    ];
+
+    for (const proxyGen of proxies) {
+      try {
+        const proxyUrl = proxyGen(validUrl);
+        const res = await fetch(proxyUrl, {
+          method: 'GET',
+          headers: {
+            Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+          },
+        });
+        if (res.ok) {
+          rawHtml = await res.text();
+          if (rawHtml && rawHtml.length > 50) {
+            break;
+          }
+        }
+      } catch (err: any) {
+        lastError = err;
+      }
+    }
   }
 
-  const rawHtml = await response.text();
+  // Native iOS / Android or Web direct fallback
+  if (!rawHtml) {
+    try {
+      const response = await fetch(validUrl, {
+        method: 'GET',
+        headers: {
+          'User-Agent':
+            'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
+          Accept: 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to load page: HTTP ${response.status} (${response.statusText})`);
+      }
+
+      rawHtml = await response.text();
+    } catch (nativeErr: any) {
+      if (Platform.OS === 'web') {
+        throw new Error(
+          `CORS policy blocked direct web fetch for "${validUrl}". On smartphone (Expo Go / Android / iOS), this request runs without CORS restrictions. For web preview, you can also use the "HTML / Text" tab to paste content directly.`
+        );
+      }
+      throw new Error(nativeErr?.message || `Failed to fetch URL: ${validUrl}`);
+    }
+  }
+
   return extractFromHtmlString(rawHtml, validUrl, domain);
 }
 
