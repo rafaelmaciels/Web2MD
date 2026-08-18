@@ -73,6 +73,18 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ markdown }) => {
       continue;
     }
 
+    // Linked image matching: [![alt](imgUrl)](linkUrl)
+    const linkedImgMatch = line.trim().match(/^\[!\[(.*?)\]\((https?:\/\/[^\s\)]+)\)\]\((https?:\/\/[^\s\)]+)\)$/);
+    if (linkedImgMatch) {
+      const altText = linkedImgMatch[1];
+      const imgUrl = linkedImgMatch[2];
+      const linkUrl = linkedImgMatch[3];
+      elements.push(
+        <MarkdownImage key={`linked-img-${i}`} uri={imgUrl} alt={altText} linkUrl={linkUrl} />
+      );
+      continue;
+    }
+
     // Image matching: ![alt](url)
     const imgMatch = line.trim().match(/^!\[(.*?)\]\((https?:\/\/[^\s\)]+)\)$/);
     if (imgMatch) {
@@ -159,10 +171,20 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ markdown }) => {
   );
 };
 
-// Component for rendering visual images with loading state & error fallback
-const MarkdownImage: React.FC<{ uri: string; alt?: string }> = ({ uri, alt }) => {
+// Component for rendering visual images with loading state, link click & error fallback
+const MarkdownImage: React.FC<{ uri: string; alt?: string; linkUrl?: string }> = ({
+  uri,
+  alt,
+  linkUrl,
+}) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+
+  function handlePress() {
+    if (linkUrl) {
+      Linking.openURL(linkUrl).catch(() => {});
+    }
+  }
 
   if (error) {
     return (
@@ -175,12 +197,14 @@ const MarkdownImage: React.FC<{ uri: string; alt?: string }> = ({ uri, alt }) =>
     );
   }
 
-  return (
-    <View style={styles.imgContainer}>
+  const isBadgeOrSmall = uri.includes('shields.io') || uri.includes('badge') || (alt && alt.length < 15);
+
+  const content = (
+    <View style={[styles.imgContainer, isBadgeOrSmall && styles.badgeContainer]}>
       <Image
         source={{ uri }}
-        style={styles.imgElement}
-        resizeMode="cover"
+        style={isBadgeOrSmall ? styles.badgeElement : styles.imgElement}
+        resizeMode="contain"
         onLoadEnd={() => setLoading(false)}
         onError={() => {
           setLoading(false);
@@ -192,20 +216,31 @@ const MarkdownImage: React.FC<{ uri: string; alt?: string }> = ({ uri, alt }) =>
           <ActivityIndicator size="small" color={THEME.colors.primaryAccent} />
         </View>
       )}
-      {alt ? <Text style={styles.imgCaption}>{alt}</Text> : null}
+      {!isBadgeOrSmall && alt ? <Text style={styles.imgCaption}>{alt}</Text> : null}
     </View>
   );
+
+  if (linkUrl) {
+    return (
+      <TouchableOpacity onPress={handlePress} activeOpacity={0.8}>
+        {content}
+      </TouchableOpacity>
+    );
+  }
+
+  return content;
 };
 
-// Formats inline bold, italic, code and hyperlinks: [text](url)
+// Formats inline bold, italic, code, images and hyperlinks: [text](url)
 function renderFormattedInline(text: string) {
-  // Regex to split on [anchor](url) links
-  const linkRegex = /\[(.*?)\]\((https?:\/\/[^\s\)]+)\)/g;
+  // Regex to split on [![(.*?)](imgUrl)](linkUrl) or [anchor](url) or ![alt](url)
+  const pattern = /(\[!\[(.*?)\]\((https?:\/\/[^\s\)]+)\)\]\((https?:\/\/[^\s\)]+)\))|(!\[(.*?)\]\((https?:\/\/[^\s\)]+)\))|(\[(.*?)\]\((https?:\/\/[^\s\)]+)\))/g;
+
   const parts: React.ReactNode[] = [];
   let lastIndex = 0;
   let match;
 
-  while ((match = linkRegex.exec(text)) !== null) {
+  while ((match = pattern.exec(text)) !== null) {
     const preText = text.substring(lastIndex, match.index);
     if (preText) {
       parts.push(
@@ -215,20 +250,37 @@ function renderFormattedInline(text: string) {
       );
     }
 
-    const anchor = match[1] || match[2];
-    const url = match[2];
-
-    parts.push(
-      <TouchableOpacity
-        key={`link-${match.index}`}
-        onPress={() => Linking.openURL(url).catch(() => {})}
-        activeOpacity={0.7}
-      >
-        <Text style={styles.hyperlink}>
-          {anchor} <Feather name="external-link" size={11} color={THEME.colors.primaryAccent} />
-        </Text>
-      </TouchableOpacity>
-    );
+    if (match[1]) {
+      // Linked image: [![alt](imgUrl)](linkUrl)
+      const alt = match[2];
+      const imgUrl = match[3];
+      const linkUrl = match[4];
+      parts.push(
+        <MarkdownImage key={`inl-limg-${match.index}`} uri={imgUrl} alt={alt} linkUrl={linkUrl} />
+      );
+    } else if (match[5]) {
+      // Standalone inline image: ![alt](imgUrl)
+      const alt = match[6];
+      const imgUrl = match[7];
+      parts.push(
+        <MarkdownImage key={`inl-img-${match.index}`} uri={imgUrl} alt={alt} />
+      );
+    } else if (match[8]) {
+      // Hyperlink: [anchor](url)
+      const anchor = match[9] || match[10];
+      const url = match[10];
+      parts.push(
+        <TouchableOpacity
+          key={`link-${match.index}`}
+          onPress={() => Linking.openURL(url).catch(() => {})}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.hyperlink}>
+            {anchor} <Feather name="external-link" size={11} color={THEME.colors.primaryAccent} />
+          </Text>
+        </TouchableOpacity>
+      );
+    }
 
     lastIndex = match.index + match[0].length;
   }
@@ -401,17 +453,28 @@ const styles = StyleSheet.create({
     fontSize: 11,
   },
   imgContainer: {
-    marginVertical: 12,
+    marginVertical: 10,
     borderRadius: THEME.radius.md,
     overflow: 'hidden',
     backgroundColor: THEME.colors.bgCard,
     borderWidth: 1,
     borderColor: THEME.colors.border,
   },
+  badgeContainer: {
+    marginVertical: 4,
+    padding: 4,
+    alignSelf: 'flex-start',
+    backgroundColor: 'transparent',
+    borderWidth: 0,
+  },
   imgElement: {
     width: '100%',
-    height: 200,
+    height: 190,
     backgroundColor: THEME.colors.bgCard,
+  },
+  badgeElement: {
+    width: 130,
+    height: 32,
   },
   imgLoadingOverlay: {
     position: 'absolute',
@@ -419,7 +482,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    backgroundColor: 'rgba(18, 18, 20, 0.6)',
+    backgroundColor: 'rgba(18, 18, 20, 0.5)',
     alignItems: 'center',
     justifyContent: 'center',
   },

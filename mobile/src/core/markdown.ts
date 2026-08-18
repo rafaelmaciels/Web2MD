@@ -63,37 +63,40 @@ export function htmlToMarkdownPure(html: string, settings: UserSettings, baseUrl
     return `\n\n${lines.map((l) => `> ${l}`).join('\n')}\n\n`;
   });
 
-  // 5. Images - With full support for lazy loading, data-src, srcset & absolute URL resolution
+  // 5. Linked Images: <a href="..."><img src="..." alt="..."></a>
+  if (settings.includeImages && settings.includeLinks) {
+    md = md.replace(/<a\b([^>]*?)>\s*<img\b([^>]*?)>\s*<\/a>/gi, (_, aAttrs, imgAttrs) => {
+      let href = extractAttr(aAttrs, 'href') || '';
+      href = resolveAbsoluteUrl(href, baseUrl);
+
+      let src = extractImgSrc(imgAttrs);
+      if (!src) return '';
+      src = resolveAbsoluteUrl(src, baseUrl);
+
+      let alt = extractAttr(imgAttrs, 'alt') || '';
+      alt = cleanInline(alt).replace(/[\[\]]/g, '');
+
+      return `[![${alt}](${src})](${href})`;
+    });
+  }
+
+  // 6. Standalone Images: <img src="..." alt="...">
   if (settings.includeImages) {
     md = md.replace(/<img\b([^>]*?)>/gi, (_, attrs) => {
-      // Extract src or lazy-load alternatives
-      let src = extractAttr(attrs, 'src') || '';
-      const dataSrc = extractAttr(attrs, 'data-src') || extractAttr(attrs, 'data-original') || extractAttr(attrs, 'data-lazy-src') || '';
-      const srcset = extractAttr(attrs, 'srcset') || extractAttr(attrs, 'data-srcset') || '';
-      
-      // If src is a placeholder/data-uri or empty, prefer data-src or highest srcset item
-      if ((!src || src.startsWith('data:image')) && dataSrc) {
-        src = dataSrc;
-      } else if ((!src || src.startsWith('data:image')) && srcset) {
-        const firstSrc = srcset.split(',')[0].trim().split(' ')[0];
-        if (firstSrc) src = firstSrc;
-      }
-
-      if (!src || src.startsWith('data:image')) return '';
-
-      // Normalize protocol-relative and relative URLs
+      let src = extractImgSrc(attrs);
+      if (!src) return '';
       src = resolveAbsoluteUrl(src, baseUrl);
 
       let alt = extractAttr(attrs, 'alt') || '';
       alt = cleanInline(alt).replace(/[\[\]]/g, '');
 
-      return `\n\n![${alt}](${src})\n\n`;
+      return `![${alt}](${src})`;
     });
   } else {
     md = md.replace(/<img[^>]*>/gi, '');
   }
 
-  // 6. Hyperlinks - With absolute URL resolution
+  // 7. Standalone Hyperlinks: <a href="...">text</a>
   if (settings.includeLinks) {
     md = md.replace(/<a\b([^>]*?)>([\s\S]*?)<\/a>/gi, (_, attrs, text) => {
       let href = extractAttr(attrs, 'href') || '';
@@ -110,12 +113,12 @@ export function htmlToMarkdownPure(html: string, settings: UserSettings, baseUrl
     md = md.replace(/<a[^>]*>([\s\S]*?)<\/a>/gi, '$1');
   }
 
-  // 7. Bold, Italic, Strikethrough
+  // 8. Bold, Italic, Strikethrough
   md = md.replace(/<(?:strong|b)[^>]*>([\s\S]*?)<\/(?:strong|b)>/gi, '**$1**');
   md = md.replace(/<(?:em|i)[^>]*>([\s\S]*?)<\/(?:em|i)>/gi, '*$1*');
   md = md.replace(/<(?:del|s|strike)[^>]*>([\s\S]*?)<\/(?:del|s|strike)>/gi, '~~$1~~');
 
-  // 8. Lists (Ordered and Unordered)
+  // 9. Lists (Ordered and Unordered)
   const marker = settings.bulletListMarker || '-';
   md = md.replace(/<ul[^>]*>([\s\S]*?)<\/ul>/gi, (_, listContent) => {
     const items = listContent.match(/<li[^>]*>([\s\S]*?)<\/li>/gi) || [];
@@ -135,7 +138,7 @@ export function htmlToMarkdownPure(html: string, settings: UserSettings, baseUrl
     return `\n\n${formatted.join('\n')}\n\n`;
   });
 
-  // 9. Tables (GFM)
+  // 10. Tables (GFM)
   md = md.replace(/<table[^>]*>([\s\S]*?)<\/table>/gi, (_, tableContent) => {
     const rows = tableContent.match(/<tr[^>]*>([\s\S]*?)<\/tr>/gi) || [];
     if (rows.length === 0) return '';
@@ -162,7 +165,7 @@ export function htmlToMarkdownPure(html: string, settings: UserSettings, baseUrl
     return tableMd + '\n';
   });
 
-  // 10. Paragraphs, line breaks, HR
+  // 11. Paragraphs, line breaks, HR
   md = md.replace(/<hr\s*\/?>/gi, '\n\n---\n\n');
   md = md.replace(/<br\s*\/?>/gi, '\n');
   md = md.replace(/<p[^>]*>([\s\S]*?)<\/p>/gi, '\n\n$1\n\n');
@@ -173,6 +176,9 @@ export function htmlToMarkdownPure(html: string, settings: UserSettings, baseUrl
 
   // Decode HTML entities
   md = decodeEntities(md);
+
+  // Fix any malformed broken bracketed images `[ ![alt](img) ](url)`
+  md = md.replace(/\[\s*!\[(.*?)\]\((.*?)\)\s*\]\((.*?)\)/g, '[![$1]($2)]($3)');
 
   // Normalize excessive newlines
   md = md.replace(/\n{3,}/g, '\n\n').trim();
@@ -246,6 +252,22 @@ export function convertToMarkdown(
     imageCount: imageMatches.length,
     linkCount: Math.max(0, linkMatches.length - imageMatches.length),
   };
+}
+
+function extractImgSrc(attrs: string): string | null {
+  let src = extractAttr(attrs, 'src') || '';
+  const dataSrc = extractAttr(attrs, 'data-src') || extractAttr(attrs, 'data-original') || extractAttr(attrs, 'data-lazy-src') || '';
+  const srcset = extractAttr(attrs, 'srcset') || extractAttr(attrs, 'data-srcset') || '';
+  
+  if ((!src || src.startsWith('data:image')) && dataSrc) {
+    src = dataSrc;
+  } else if ((!src || src.startsWith('data:image')) && srcset) {
+    const firstSrc = srcset.split(',')[0].trim().split(' ')[0];
+    if (firstSrc) src = firstSrc;
+  }
+
+  if (!src || src.startsWith('data:image')) return null;
+  return src;
 }
 
 function extractAttr(attrsString: string, attrName: string): string | null {
