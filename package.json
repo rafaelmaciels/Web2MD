@@ -10,6 +10,7 @@
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
     "mobile": "npm --prefix mobile start",
+    "mobile:tunnel": "npm --prefix mobile run tunnel",
     "mobile:android": "npm --prefix mobile run android",
     "mobile:ios": "npm --prefix mobile run ios",
     "mobile:web": "npm --prefix mobile run web"
