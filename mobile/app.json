@@ -24,6 +24,7 @@
         "backgroundColor": "#121214"
       },
       "package": "com.web2md.app",
+      "googleServicesFile": "./google-services.json",
       "permissions": [
         "INTERNET",
         "READ_EXTERNAL_STORAGE",
