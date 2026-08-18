@@ -1,5 +1,6 @@
-import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, ScrollView, Image, TouchableOpacity, Linking, ActivityIndicator } from 'react-native';
+import { Feather } from '@expo/vector-icons';
 import { THEME } from '../types/theme';
 
 interface MarkdownViewerProps {
@@ -72,6 +73,17 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ markdown }) => {
       continue;
     }
 
+    // Image matching: ![alt](url)
+    const imgMatch = line.trim().match(/^!\[(.*?)\]\((https?:\/\/[^\s\)]+)\)$/);
+    if (imgMatch) {
+      const altText = imgMatch[1];
+      const imgUrl = imgMatch[2];
+      elements.push(
+        <MarkdownImage key={`img-${i}`} uri={imgUrl} alt={altText} />
+      );
+      continue;
+    }
+
     // Headers
     if (line.startsWith('# ')) {
       elements.push(
@@ -107,7 +119,9 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ markdown }) => {
       elements.push(
         <View key={`li-${i}`} style={styles.listItem}>
           <Text style={styles.listBullet}>•</Text>
-          <Text style={styles.listText}>{line.substring(2)}</Text>
+          <View style={styles.listTextContainer}>
+            {renderFormattedInline(line.substring(2))}
+          </View>
         </View>
       );
     } else if (/^\d+\.\s/.test(line)) {
@@ -115,16 +129,25 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ markdown }) => {
       elements.push(
         <View key={`numli-${i}`} style={styles.listItem}>
           <Text style={styles.listNumber}>{match ? match[1] : '1.'}</Text>
-          <Text style={styles.listText}>{match ? match[2] : line}</Text>
+          <View style={styles.listTextContainer}>
+            {renderFormattedInline(match ? match[2] : line)}
+          </View>
+        </View>
+      );
+    } else if (line.startsWith('|') && line.endsWith('|')) {
+      // Table row
+      elements.push(
+        <View key={`tr-${i}`} style={styles.tableRow}>
+          <Text style={styles.tableRowText}>{line}</Text>
         </View>
       );
     } else if (!line.trim()) {
       elements.push(<View key={`spacer-${i}`} style={styles.spacer} />);
     } else {
       elements.push(
-        <Text key={`p-${i}`} style={styles.paragraph}>
-          {line}
-        </Text>
+        <View key={`p-${i}`} style={styles.paragraphContainer}>
+          {renderFormattedInline(line)}
+        </View>
       );
     }
   }
@@ -136,6 +159,96 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ markdown }) => {
   );
 };
 
+// Component for rendering visual images with loading state & error fallback
+const MarkdownImage: React.FC<{ uri: string; alt?: string }> = ({ uri, alt }) => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  if (error) {
+    return (
+      <View style={styles.imgErrorCard}>
+        <Feather name="image" size={18} color={THEME.colors.textMuted} />
+        <Text style={styles.imgErrorText} numberOfLines={1}>
+          {alt || uri}
+        </Text>
+      </View>
+    );
+  }
+
+  return (
+    <View style={styles.imgContainer}>
+      <Image
+        source={{ uri }}
+        style={styles.imgElement}
+        resizeMode="cover"
+        onLoadEnd={() => setLoading(false)}
+        onError={() => {
+          setLoading(false);
+          setError(true);
+        }}
+      />
+      {loading && (
+        <View style={styles.imgLoadingOverlay}>
+          <ActivityIndicator size="small" color={THEME.colors.primaryAccent} />
+        </View>
+      )}
+      {alt ? <Text style={styles.imgCaption}>{alt}</Text> : null}
+    </View>
+  );
+};
+
+// Formats inline bold, italic, code and hyperlinks: [text](url)
+function renderFormattedInline(text: string) {
+  // Regex to split on [anchor](url) links
+  const linkRegex = /\[(.*?)\]\((https?:\/\/[^\s\)]+)\)/g;
+  const parts: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = linkRegex.exec(text)) !== null) {
+    const preText = text.substring(lastIndex, match.index);
+    if (preText) {
+      parts.push(
+        <Text key={`pre-${lastIndex}`} style={styles.paragraph}>
+          {preText}
+        </Text>
+      );
+    }
+
+    const anchor = match[1] || match[2];
+    const url = match[2];
+
+    parts.push(
+      <TouchableOpacity
+        key={`link-${match.index}`}
+        onPress={() => Linking.openURL(url).catch(() => {})}
+        activeOpacity={0.7}
+      >
+        <Text style={styles.hyperlink}>
+          {anchor} <Feather name="external-link" size={11} color={THEME.colors.primaryAccent} />
+        </Text>
+      </TouchableOpacity>
+    );
+
+    lastIndex = match.index + match[0].length;
+  }
+
+  const remaining = text.substring(lastIndex);
+  if (remaining) {
+    parts.push(
+      <Text key={`rem-${lastIndex}`} style={styles.paragraph}>
+        {remaining}
+      </Text>
+    );
+  }
+
+  if (parts.length === 0) {
+    return <Text style={styles.paragraph}>{text}</Text>;
+  }
+
+  return <Text style={styles.inlineWrapper}>{parts}</Text>;
+}
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -143,7 +256,7 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: 16,
-    paddingBottom: 40,
+    paddingBottom: 44,
   },
   emptyContainer: {
     flex: 1,
@@ -206,11 +319,23 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginBottom: 6,
   },
+  paragraphContainer: {
+    marginBottom: 10,
+  },
   paragraph: {
     color: '#D4D4D8',
     fontSize: 14,
     lineHeight: 22,
-    marginBottom: 8,
+  },
+  inlineWrapper: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+  },
+  hyperlink: {
+    color: THEME.colors.primaryAccent,
+    fontSize: 14,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
   },
   quoteBox: {
     borderLeftWidth: 3,
@@ -246,10 +371,7 @@ const styles = StyleSheet.create({
     width: 22,
     lineHeight: 20,
   },
-  listText: {
-    color: '#D4D4D8',
-    fontSize: 14,
-    lineHeight: 20,
+  listTextContainer: {
     flex: 1,
   },
   codeBlock: {
@@ -265,6 +387,65 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontFamily: 'monospace',
     lineHeight: 18,
+  },
+  tableRow: {
+    backgroundColor: THEME.colors.bgCard,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderBottomWidth: 1,
+    borderBottomColor: THEME.colors.border,
+  },
+  tableRowText: {
+    color: '#D4D4D8',
+    fontFamily: 'monospace',
+    fontSize: 11,
+  },
+  imgContainer: {
+    marginVertical: 12,
+    borderRadius: THEME.radius.md,
+    overflow: 'hidden',
+    backgroundColor: THEME.colors.bgCard,
+    borderWidth: 1,
+    borderColor: THEME.colors.border,
+  },
+  imgElement: {
+    width: '100%',
+    height: 200,
+    backgroundColor: THEME.colors.bgCard,
+  },
+  imgLoadingOverlay: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: 'rgba(18, 18, 20, 0.6)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  imgCaption: {
+    color: THEME.colors.textSecondary,
+    fontSize: 11,
+    fontStyle: 'italic',
+    padding: 8,
+    textAlign: 'center',
+    backgroundColor: THEME.colors.bgHeader,
+  },
+  imgErrorCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: THEME.colors.bgCard,
+    borderColor: THEME.colors.border,
+    borderWidth: 1,
+    borderRadius: THEME.radius.sm,
+    padding: 10,
+    gap: 8,
+    marginVertical: 8,
+  },
+  imgErrorText: {
+    color: THEME.colors.textMuted,
+    fontSize: 12,
+    flex: 1,
   },
   spacer: {
     height: 8,

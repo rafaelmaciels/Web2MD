@@ -5,12 +5,12 @@ import { sanitizeFilename } from './filename';
  * Pure JavaScript HTML to Markdown Converter for React Native & Web
  * Does not depend on browser DOMParser or document globals.
  */
-export function htmlToMarkdownPure(html: string, settings: UserSettings): string {
+export function htmlToMarkdownPure(html: string, settings: UserSettings, baseUrl?: string): string {
   if (!html) return '';
 
   let md = html;
 
-  // 1. Remove comments, scripts, styles
+  // 1. Remove comments, scripts, styles, noscript
   md = md
     .replace(/<!--[\s\S]*?-->/g, '')
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
@@ -63,18 +63,45 @@ export function htmlToMarkdownPure(html: string, settings: UserSettings): string
     return `\n\n${lines.map((l) => `> ${l}`).join('\n')}\n\n`;
   });
 
-  // 5. Images
+  // 5. Images - With full support for lazy loading, data-src, srcset & absolute URL resolution
   if (settings.includeImages) {
-    md = md.replace(/<img[^>]*\bsrc=["']([^"']+)["'][^>]*\balt=["']([^"']*)["'][^>]*>/gi, '![$2]($1)');
-    md = md.replace(/<img[^>]*\balt=["']([^"']*)["'][^>]*\bsrc=["']([^"']+)["'][^>]*>/gi, '![$1]($2)');
-    md = md.replace(/<img[^>]*\bsrc=["']([^"']+)["'][^>]*>/gi, '![]($1)');
+    md = md.replace(/<img\b([^>]*?)>/gi, (_, attrs) => {
+      // Extract src or lazy-load alternatives
+      let src = extractAttr(attrs, 'src') || '';
+      const dataSrc = extractAttr(attrs, 'data-src') || extractAttr(attrs, 'data-original') || extractAttr(attrs, 'data-lazy-src') || '';
+      const srcset = extractAttr(attrs, 'srcset') || extractAttr(attrs, 'data-srcset') || '';
+      
+      // If src is a placeholder/data-uri or empty, prefer data-src or highest srcset item
+      if ((!src || src.startsWith('data:image')) && dataSrc) {
+        src = dataSrc;
+      } else if ((!src || src.startsWith('data:image')) && srcset) {
+        const firstSrc = srcset.split(',')[0].trim().split(' ')[0];
+        if (firstSrc) src = firstSrc;
+      }
+
+      if (!src || src.startsWith('data:image')) return '';
+
+      // Normalize protocol-relative and relative URLs
+      src = resolveAbsoluteUrl(src, baseUrl);
+
+      let alt = extractAttr(attrs, 'alt') || '';
+      alt = cleanInline(alt).replace(/[\[\]]/g, '');
+
+      return `\n\n![${alt}](${src})\n\n`;
+    });
   } else {
     md = md.replace(/<img[^>]*>/gi, '');
   }
 
-  // 6. Hyperlinks
+  // 6. Hyperlinks - With absolute URL resolution
   if (settings.includeLinks) {
-    md = md.replace(/<a[^>]*\bhref=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi, (_, href, text) => {
+    md = md.replace(/<a\b([^>]*?)>([\s\S]*?)<\/a>/gi, (_, attrs, text) => {
+      let href = extractAttr(attrs, 'href') || '';
+      if (!href || href.startsWith('#') || href.startsWith('javascript:')) {
+        return cleanInline(text);
+      }
+
+      href = resolveAbsoluteUrl(href, baseUrl);
       const anchor = cleanInline(text);
       if (!anchor.trim()) return '';
       return `[${anchor}](${href})`;
@@ -83,7 +110,7 @@ export function htmlToMarkdownPure(html: string, settings: UserSettings): string
     md = md.replace(/<a[^>]*>([\s\S]*?)<\/a>/gi, '$1');
   }
 
-  // 7. Bold and Italic
+  // 7. Bold, Italic, Strikethrough
   md = md.replace(/<(?:strong|b)[^>]*>([\s\S]*?)<\/(?:strong|b)>/gi, '**$1**');
   md = md.replace(/<(?:em|i)[^>]*>([\s\S]*?)<\/(?:em|i)>/gi, '*$1*');
   md = md.replace(/<(?:del|s|strike)[^>]*>([\s\S]*?)<\/(?:del|s|strike)>/gi, '~~$1~~');
@@ -122,11 +149,13 @@ export function htmlToMarkdownPure(html: string, settings: UserSettings): string
         cleanInline(c.replace(/<(?:th|td)[^>]*>([\s\S]*?)<\/(?:th|td)>/i, '$1')).replace(/\|/g, '\\|')
       );
 
-      tableMd += `| ${cellTexts.join(' | ')} |\n`;
+      if (cellTexts.length > 0) {
+        tableMd += `| ${cellTexts.join(' | ')} |\n`;
 
-      if (isHeader) {
-        tableMd += `| ${cellTexts.map(() => '---').join(' | ')} |\n`;
-        isHeader = false;
+        if (isHeader) {
+          tableMd += `| ${cellTexts.map(() => '---').join(' | ')} |\n`;
+          isHeader = false;
+        }
       }
     });
 
@@ -161,7 +190,7 @@ export function convertToMarkdown(
     bodyMarkdown = extracted.selectionText.trim();
   } else {
     const rawContent = extracted.contentHtml || extracted.textContent || '';
-    bodyMarkdown = htmlToMarkdownPure(rawContent, settings);
+    bodyMarkdown = htmlToMarkdownPure(rawContent, settings, extracted.url);
   }
 
   // Clean up excess blank lines
@@ -203,8 +232,8 @@ export function convertToMarkdown(
   const readingTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
 
   // Count images and links in final markdown
-  const imageMatches = finalMarkdown.match(/!\[.*?\]\(.*?\)/g) || [];
-  const linkMatches = finalMarkdown.match(/\[.*?\]\(.*?\)/g) || [];
+  const imageMatches = finalMarkdown.match(/!\[.*?\]\((https?:\/\/[^\s\)]+|\/[^\s\)]+)\)/g) || [];
+  const linkMatches = finalMarkdown.match(/\[.*?\]\((https?:\/\/[^\s\)]+|\/[^\s\)]+)\)/g) || [];
 
   const suggestedFilename = sanitizeFilename(extracted.title);
 
@@ -217,6 +246,38 @@ export function convertToMarkdown(
     imageCount: imageMatches.length,
     linkCount: Math.max(0, linkMatches.length - imageMatches.length),
   };
+}
+
+function extractAttr(attrsString: string, attrName: string): string | null {
+  const regex = new RegExp(`(?:^|\\s)${attrName}=["']([^"']+)["']`, 'i');
+  const match = attrsString.match(regex);
+  return match ? match[1] : null;
+}
+
+function resolveAbsoluteUrl(relativeUrl: string, baseUrl?: string): string {
+  if (!relativeUrl) return '';
+
+  // Protocol-relative URL: //upload.wikimedia.org/...
+  if (relativeUrl.startsWith('//')) {
+    return `https:${relativeUrl}`;
+  }
+
+  // Already absolute HTTP/HTTPS
+  if (/^https?:\/\//i.test(relativeUrl)) {
+    return relativeUrl;
+  }
+
+  // If we have a base URL, resolve relative paths like /images/pic.png or ./pic.png
+  if (baseUrl && /^https?:\/\//i.test(baseUrl)) {
+    try {
+      const urlObj = new URL(relativeUrl, baseUrl);
+      return urlObj.href;
+    } catch {
+      return relativeUrl;
+    }
+  }
+
+  return relativeUrl;
 }
 
 function cleanInline(str: string): string {
