@@ -8,7 +8,11 @@ export function extractPageContent(doc: Document, targetUrl?: string): Extracted
   let domain = '';
   try {
     const parsedUrl = new URL(currentUrl);
-    domain = parsedUrl.hostname.replace(/^www\./, '');
+    if (parsedUrl.protocol === 'file:') {
+      domain = 'local file';
+    } else {
+      domain = parsedUrl.hostname.replace(/^www\./, '');
+    }
   } catch {
     domain = 'unknown';
   }
@@ -31,8 +35,24 @@ export function extractPageContent(doc: Document, targetUrl?: string): Extracted
     console.warn('[Web2MD] Readability parsing fallback:', err);
   }
 
-  // Determine title
-  const title = article?.title || doc.title || doc.querySelector('h1')?.textContent?.trim() || 'Untitled Page';
+  // Determine title with fallback for local files
+  let fileTitleFallback = '';
+  try {
+    const parsedUrl = new URL(currentUrl);
+    if (parsedUrl.protocol === 'file:') {
+      const fileName = decodeURIComponent(parsedUrl.pathname.split('/').filter(Boolean).pop() || '');
+      fileTitleFallback = fileName.replace(/\.[^/.]+$/, '');
+    }
+  } catch {
+    // Ignore URL parse error
+  }
+
+  const title =
+    article?.title ||
+    doc.title ||
+    doc.querySelector('h1')?.textContent?.trim() ||
+    fileTitleFallback ||
+    'Untitled Page';
 
   // Determine content HTML & text
   const contentHtml = article?.content || cleanedDoc.body?.innerHTML || doc.body?.innerHTML || '';

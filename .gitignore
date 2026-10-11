@@ -10,3 +10,4 @@ Thumbs.db
 .expo-shared/
 web-build/
 *.tsbuildinfo
+*.zip

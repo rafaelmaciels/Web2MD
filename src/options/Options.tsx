@@ -1,14 +1,20 @@
 import { useEffect, useState } from 'react';
-import { FileCode, Sliders, FolderDown, Save } from 'lucide-react';
+import { FileCode, Sliders, FolderDown, Save, FileText, ExternalLink } from 'lucide-react';
 import { getStoredSettings, saveStoredSettings } from '../core/storage';
 import { UserSettings, DEFAULT_SETTINGS } from '../shared/types';
 
 export default function Options() {
   const [settings, setSettings] = useState<UserSettings>(DEFAULT_SETTINGS);
   const [saved, setSaved] = useState<boolean>(false);
+  const [fileAccessAllowed, setFileAccessAllowed] = useState<boolean | null>(null);
 
   useEffect(() => {
     getStoredSettings().then((s) => setSettings(s));
+    if (typeof chrome !== 'undefined' && chrome.extension?.isAllowedFileSchemeAccess) {
+      chrome.extension.isAllowedFileSchemeAccess((allowed) => {
+        setFileAccessAllowed(Boolean(allowed));
+      });
+    }
   }, []);
 
   async function handleSave() {
@@ -19,6 +25,22 @@ export default function Options() {
 
   function updateField<K extends keyof UserSettings>(key: K, value: UserSettings[K]) {
     setSettings((prev) => ({ ...prev, [key]: value }));
+  }
+
+  function openExtensionDetails() {
+    const isEdge = typeof navigator !== 'undefined' && /Edg/i.test(navigator.userAgent);
+    const extId = typeof chrome !== 'undefined' && chrome.runtime?.id ? chrome.runtime.id : '';
+    const targetUrl = isEdge
+      ? `edge://extensions/?id=${extId}`
+      : `chrome://extensions/?id=${extId}`;
+
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+      chrome.tabs.create({ url: targetUrl }, () => {
+        if (chrome.runtime.lastError) {
+          chrome.tabs.create({ url: isEdge ? 'edge://extensions' : 'chrome://extensions' });
+        }
+      });
+    }
   }
 
   return (
@@ -158,6 +180,35 @@ export default function Options() {
             value={settings.downloadFolder}
             onChange={(e) => updateField('downloadFolder', e.target.value)}
           />
+        </div>
+      </div>
+
+      {/* Local Files Permission Section */}
+      <div className="section-card">
+        <div className="section-title">
+          <FileText size={18} />
+          Local Files Support (file:///)
+        </div>
+
+        <div className="option-row">
+          <div className="option-info">
+            <span className="option-label">Browser File URL Permission</span>
+            <span className="option-desc">
+              {fileAccessAllowed === true
+                ? 'Active: Web2MD has permission to convert local files (file://) in your browser.'
+                : fileAccessAllowed === false
+                ? 'Inactive: Edge/Chrome blocks extensions from reading local files until enabled in extension settings.'
+                : 'Check or enable "Allow access to file URLs" in browser extension settings.'}
+            </span>
+          </div>
+          <button
+            type="button"
+            className="btn-outline"
+            onClick={openExtensionDetails}
+          >
+            <ExternalLink size={13} />
+            {fileAccessAllowed === true ? 'Manage in Browser' : 'Enable in Browser'}
+          </button>
         </div>
       </div>
 

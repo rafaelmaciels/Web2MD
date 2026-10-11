@@ -26,25 +26,50 @@ chrome.contextMenus.onClicked.addListener(async (info, tab) => {
   try {
     const settings = await getStoredSettings();
 
-    // Send extract content message to active tab content script
+    const handleExtractionResponse = (response: ExtensionResponse<ExtractedPage> | undefined) => {
+      if (!response || !response.success || !response.data) {
+        console.warn('[Web2MD ServiceWorker] Extraction failed from content script');
+        return;
+      }
+
+      const extracted = response.data;
+      if (info.menuItemId === 'web2md-convert-selection' && info.selectionText) {
+        extracted.selectionText = info.selectionText;
+      }
+
+      const result = convertToMarkdown(extracted, settings);
+
+      // Auto download file
+      downloadMarkdownFile(result.markdown, result.suggestedFilename, settings.downloadFolder);
+    };
+
+    // Send extract content message to active tab content script with injection fallback
     chrome.tabs.sendMessage(
       tab.id,
       { type: info.menuItemId === 'web2md-convert-selection' ? 'GET_SELECTION' : 'EXTRACT_CONTENT' },
-      async (response: ExtensionResponse<ExtractedPage>) => {
-        if (!response || !response.success || !response.data) {
-          console.warn('[Web2MD ServiceWorker] Extraction failed from content script');
-          return;
+      (response: ExtensionResponse<ExtractedPage>) => {
+        if (chrome.runtime.lastError || !response || !response.success) {
+          // Fallback programmatic injection if content script isn't loaded yet
+          if (chrome.scripting && tab.id) {
+            chrome.scripting.executeScript(
+              {
+                target: { tabId: tab.id },
+                files: ['content/index.js'],
+              },
+              () => {
+                if (!chrome.runtime.lastError) {
+                  chrome.tabs.sendMessage(
+                    tab.id!,
+                    { type: info.menuItemId === 'web2md-convert-selection' ? 'GET_SELECTION' : 'EXTRACT_CONTENT' },
+                    handleExtractionResponse
+                  );
+                }
+              }
+            );
+          }
+        } else {
+          handleExtractionResponse(response);
         }
-
-        const extracted = response.data;
-        if (info.menuItemId === 'web2md-convert-selection' && info.selectionText) {
-          extracted.selectionText = info.selectionText;
-        }
-
-        const result = convertToMarkdown(extracted, settings);
-
-        // Auto download file
-        downloadMarkdownFile(result.markdown, result.suggestedFilename, settings.downloadFolder);
       }
     );
   } catch (err) {

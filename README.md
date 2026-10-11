@@ -75,6 +75,7 @@ The compiled extension will be output to the `dist/` directory.
 1. Open Chrome and navigate to `chrome://extensions/` (or `edge://extensions/`).
 2. Enable **Developer mode** in the top right corner.
 3. Click **Load unpacked** and select the `dist/` folder.
+4. **Converting Local Files (`file:///`)**: To convert local files (e.g. `file:///Users/.../document.html`), click **Details** on Web2MD in `chrome://extensions/` or `edge://extensions/` and toggle ON **"Allow access to file URLs"**.
 
 ---
 

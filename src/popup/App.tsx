@@ -14,6 +14,7 @@ import {
   FileCode,
   Image as ImageIcon,
   Link as LinkIcon,
+  ExternalLink,
 } from 'lucide-react';
 import { convertToMarkdown } from '../core/markdown';
 import { getStoredSettings, saveStoredSettings } from '../core/storage';
@@ -30,6 +31,7 @@ export default function App() {
   const [customMarkdown, setCustomMarkdown] = useState<string>('');
   const [filename, setFilename] = useState<string>('web2md_doc.md');
   const [copied, setCopied] = useState<boolean>(false);
+  const [fileAccessPrompt, setFileAccessPrompt] = useState<boolean>(false);
 
   useEffect(() => {
     initPopup();
@@ -45,9 +47,22 @@ export default function App() {
     }
   }, [extracted, settings]);
 
+  async function checkFileSchemeAccess(): Promise<boolean> {
+    return new Promise<boolean>((resolve) => {
+      if (typeof chrome !== 'undefined' && chrome.extension?.isAllowedFileSchemeAccess) {
+        chrome.extension.isAllowedFileSchemeAccess((isAllowed) => {
+          resolve(Boolean(isAllowed));
+        });
+      } else {
+        resolve(false);
+      }
+    });
+  }
+
   async function initPopup() {
     setLoading(true);
     setErrorMsg(null);
+    setFileAccessPrompt(false);
 
     try {
       const loadedSettings = await getStoredSettings();
@@ -56,13 +71,35 @@ export default function App() {
       // Query current active browser tab
       if (typeof chrome !== 'undefined' && chrome.tabs) {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-        
-        if (!tab || !tab.id || !tab.url) {
+        const isFileAllowed = await checkFileSchemeAccess();
+
+        if (!tab || !tab.id) {
           setErrorMsg('No active web page detected.');
           setLoading(false);
           return;
         }
 
+        // Case 1: tab.url is missing (Edge/Chrome hides URL for file:// when permission is not allowed, or internal page)
+        if (!tab.url) {
+          if (!isFileAllowed) {
+            setFileAccessPrompt(true);
+            setErrorMsg('Local file detected, but file access is not enabled in your browser settings.');
+          } else {
+            setErrorMsg('No active web page detected.');
+          }
+          setLoading(false);
+          return;
+        }
+
+        // Case 2: tab.url is a local file (file://) but file access permission is not granted
+        if (tab.url.startsWith('file://') && !isFileAllowed) {
+          setFileAccessPrompt(true);
+          setErrorMsg('Local file access is disabled in browser settings.');
+          setLoading(false);
+          return;
+        }
+
+        // Case 3: internal browser pages that cannot be accessed
         if (isRestrictedUrl(tab.url)) {
           setErrorMsg('Internal browser pages (chrome://, edge://, extensions) cannot be converted to Markdown.');
           setLoading(false);
@@ -107,7 +144,7 @@ export default function App() {
     }
   }
 
-  function injectAndExtract(tabId: number, _tabUrl: string, _loadedSettings: UserSettings) {
+  function injectAndExtract(tabId: number, tabUrl: string, _loadedSettings: UserSettings) {
     if (!chrome.scripting) {
       setErrorMsg('Scripting permission unavailable for active tab.');
       setLoading(false);
@@ -121,7 +158,13 @@ export default function App() {
       },
       () => {
         if (chrome.runtime.lastError) {
-          setErrorMsg(`Unable to read page content: ${chrome.runtime.lastError.message}`);
+          const errMsg = chrome.runtime.lastError.message || '';
+          if (tabUrl.startsWith('file://') || errMsg.toLowerCase().includes('file')) {
+            setFileAccessPrompt(true);
+            setErrorMsg('Local file access required: please ensure "Allow access to file URLs" is enabled.');
+          } else {
+            setErrorMsg(`Unable to read page content: ${errMsg}`);
+          }
           setLoading(false);
           return;
         }
@@ -207,6 +250,26 @@ export default function App() {
     }
   }
 
+  function openExtensionDetails() {
+    const isEdge = typeof navigator !== 'undefined' && /Edg/i.test(navigator.userAgent);
+    const extId = typeof chrome !== 'undefined' && chrome.runtime?.id ? chrome.runtime.id : '';
+    const targetUrl = isEdge
+      ? `edge://extensions/?id=${extId}`
+      : `chrome://extensions/?id=${extId}`;
+
+    if (typeof chrome !== 'undefined' && chrome.tabs) {
+      chrome.tabs.create({ url: targetUrl }, () => {
+        if (chrome.runtime.lastError) {
+          chrome.tabs.create({ url: isEdge ? 'edge://extensions' : 'chrome://extensions' }, () => {
+            if (chrome.runtime.lastError) {
+              chrome.runtime.openOptionsPage?.();
+            }
+          });
+        }
+      });
+    }
+  }
+
   return (
     <div className="app-container">
       {/* Header */}
@@ -214,7 +277,7 @@ export default function App() {
         <div className="brand">
           <div className="brand-icon">M↓</div>
           <span className="brand-title">Web2MD</span>
-          <span className="brand-tag">v1.0</span>
+          <span className="brand-tag">v1.0.1</span>
         </div>
         <div className="header-actions">
           <button className="btn-icon" onClick={initPopup} title="Refresh Extraction">
@@ -234,15 +297,35 @@ export default function App() {
       ) : errorMsg ? (
         <div className="alert-box">
           <AlertTriangle className="alert-icon" />
-          <p className="alert-title">Page Unavailable</p>
-          <p>{errorMsg}</p>
+          <p className="alert-title">{fileAccessPrompt ? 'Local File Access Required' : 'Page Unavailable'}</p>
+          <p className="alert-desc">{errorMsg}</p>
+          {fileAccessPrompt && (
+            <div className="file-access-card">
+              <p className="file-access-tip">
+                Edge and Chrome require user permission to read local files (<code>file:///...</code>):
+              </p>
+              <ol className="file-access-steps">
+                <li>Click <strong>&quot;Open Extension Settings&quot;</strong> below</li>
+                <li>Toggle ON <strong>&quot;Allow access to file URLs&quot;</strong></li>
+                <li>Return to your local file and click <strong>Refresh</strong> (or reopen Web2MD)</li>
+              </ol>
+              <button className="btn-primary file-access-btn" onClick={openExtensionDetails}>
+                <ExternalLink size={13} style={{ marginRight: '6px' }} />
+                Open Extension Settings
+              </button>
+            </div>
+          )}
         </div>
       ) : (
         <>
           {/* URL & Domain Bar */}
           {extracted && (
             <div className="url-bar">
-              <Globe size={13} className="url-domain" />
+              {extracted.url.startsWith('file://') ? (
+                <FileCode size={13} className="url-domain" />
+              ) : (
+                <Globe size={13} className="url-domain" />
+              )}
               <span className="url-domain">{extracted.domain}</span>
               <span className="url-path">{extracted.url}</span>
             </div>

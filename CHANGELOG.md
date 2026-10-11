@@ -2,6 +2,16 @@
 
 All notable changes to the Web2MD extension project will be documented in this file.
 
+## [1.0.1] - 2026-10-11
+
+### Added & Improved
+- **Local Files Support (`file:///`)**:
+  - Added `file:///*` match patterns to `content_scripts` and `host_permissions` in Manifest V3.
+  - Implemented local file domain detection (`local file`) and automatic document title fallback from the file path.
+  - Added browser permission check using `chrome.extension.isAllowedFileSchemeAccess`.
+  - Added dedicated user onboarding card in Popup and Settings with direct link to enable "Allow access to file URLs" in Microsoft Edge and Google Chrome.
+  - Enhanced background service worker with injection fallback for context menu actions on local documents.
+
 ## [1.0.0] - 2026-08-11
 
 ### Initial Release
