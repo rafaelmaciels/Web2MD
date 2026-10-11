@@ -1,0 +1,18 @@
+{
+  "extensionName": {
+    "message": "Web2MD - Conversor de Páginas Web para Markdown",
+    "description": "O nome da extensão"
+  },
+  "extensionDescription": {
+    "message": "Converta páginas da web em arquivos Markdown (.md) limpos e estruturados para documentação, notas e prompts de IA.",
+    "description": "A descrição da extensão"
+  },
+  "actionTitle": {
+    "message": "Web2MD - Converter Página para Markdown",
+    "description": "Título de ação exibido ao passar o mouse na barra de ferramentas"
+  },
+  "commandDescription": {
+    "message": "Abrir o Conversor Markdown Web2MD",
+    "description": "Descrição do comando de atalho do teclado"
+  }
+}

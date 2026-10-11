@@ -16,6 +16,10 @@ export default defineConfig({
           src: 'public/icons/*',
           dest: 'icons',
         },
+        {
+          src: 'public/_locales',
+          dest: '.',
+        },
       ],
     }),
   ],
