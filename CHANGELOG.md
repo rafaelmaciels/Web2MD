@@ -2,6 +2,17 @@
 
 All notable changes to the Web2MD extension project will be documented in this file.
 
+## [1.1.0] - 2026-10-11
+
+### Added
+- **Internationalization (i18n & l10n)**:
+  - Added full multilingual engine with support for **English (Default)** and **Português (Brasil)**.
+  - Added dedicated Language selector in Extension Settings with real-time UI switching.
+  - Full Portuguese (Brazil) localization across Popup, Options, Context Menus, and Mobile screens.
+  - Formatted dates and numbers localized using browser `Intl` APIs.
+  - Added automated test script `verify-i18n.js` ensuring 100% key parity and fallback handling.
+  - Reactive sync of language preferences across all active extension views and background service worker.
+
 ## [1.0.1] - 2026-10-11
 
 ### Added & Improved

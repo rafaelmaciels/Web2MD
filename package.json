@@ -1,6 +1,6 @@
 {
   "name": "web2md",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Chrome & Microsoft Edge Extension to convert web pages into clean Markdown (.md) files",
   "type": "module",
   "scripts": {
@@ -10,6 +10,7 @@
     "package:extension": "npm run build && powershell -Command \"Compress-Archive -Path dist/* -DestinationPath web2md-extension.zip -Force\"",
     "preview": "vite preview",
     "type-check": "tsc --noEmit",
+    "test:i18n": "npx tsx scripts/verify-i18n.js",
     "mobile": "npm --prefix mobile start",
     "mobile:tunnel": "npm --prefix mobile run tunnel",
     "mobile:android": "npm --prefix mobile run android",

@@ -33,12 +33,15 @@ export default function App() {
     setActiveTab('editor');
   }
 
+  const isPt = settings.language === 'pt-BR';
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor={THEME.colors.bgHeader} />
 
       {/* Top Brand Header */}
       <Header
+        subtitle={isPt ? 'Conversor Web para Markdown' : 'Web to Markdown Converter'}
         onOpenSettings={() => setActiveTab('settings')}
         onRefresh={activeTab === 'convert' ? undefined : () => setActiveTab('convert')}
       />
@@ -85,7 +88,7 @@ export default function App() {
             color={activeTab === 'convert' ? THEME.colors.primaryAccent : THEME.colors.textMuted}
           />
           <Text style={[styles.navLabel, activeTab === 'convert' && styles.navLabelActive]}>
-            Converter
+            {isPt ? 'Converter' : 'Convert'}
           </Text>
         </TouchableOpacity>
 
@@ -100,7 +103,7 @@ export default function App() {
             color={activeTab === 'editor' ? THEME.colors.primaryAccent : THEME.colors.textMuted}
           />
           <Text style={[styles.navLabel, activeTab === 'editor' && styles.navLabelActive]}>
-            Editor
+            {isPt ? 'Editor' : 'Editor'}
           </Text>
         </TouchableOpacity>
 
@@ -115,7 +118,7 @@ export default function App() {
             color={activeTab === 'history' ? THEME.colors.primaryAccent : THEME.colors.textMuted}
           />
           <Text style={[styles.navLabel, activeTab === 'history' && styles.navLabelActive]}>
-            Histórico
+            {isPt ? 'Histórico' : 'History'}
           </Text>
         </TouchableOpacity>
 
@@ -130,7 +133,7 @@ export default function App() {
             color={activeTab === 'settings' ? THEME.colors.primaryAccent : THEME.colors.textMuted}
           />
           <Text style={[styles.navLabel, activeTab === 'settings' && styles.navLabelActive]}>
-            Ajustes
+            {isPt ? 'Ajustes' : 'Settings'}
           </Text>
         </TouchableOpacity>
       </View>

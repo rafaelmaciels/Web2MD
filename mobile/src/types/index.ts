@@ -10,6 +10,8 @@ export interface ArticleMetadata {
   extractedAt: string;
 }
 
+export type Language = 'en' | 'pt-BR';
+
 export interface UserSettings {
   includeFrontmatter: boolean;
   includeImages: boolean;
@@ -22,6 +24,7 @@ export interface UserSettings {
   theme: 'system' | 'dark' | 'light';
   autoCopy: boolean;
   removeQueryParameters: boolean;
+  language: Language;
 }
 
 export const DEFAULT_SETTINGS: UserSettings = {
@@ -36,6 +39,7 @@ export const DEFAULT_SETTINGS: UserSettings = {
   theme: 'dark',
   autoCopy: false,
   removeQueryParameters: false,
+  language: 'en',
 };
 
 export interface ExtractedPage {

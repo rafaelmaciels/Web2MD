@@ -18,7 +18,8 @@ import {
 } from 'lucide-react';
 import { convertToMarkdown } from '../core/markdown';
 import { getStoredSettings, saveStoredSettings } from '../core/storage';
-import { ConversionResult, ExtensionResponse, ExtractedPage, UserSettings } from '../shared/types';
+import { ConversionResult, ExtensionResponse, ExtractedPage, UserSettings, Language } from '../shared/types';
+import { t } from '../shared/i18n';
 
 export default function App() {
   const [loading, setLoading] = useState<boolean>(true);
@@ -33,8 +34,26 @@ export default function App() {
   const [copied, setCopied] = useState<boolean>(false);
   const [fileAccessPrompt, setFileAccessPrompt] = useState<boolean>(false);
 
+  const lang: Language = settings?.language || 'en';
+
   useEffect(() => {
     initPopup();
+
+    const handleStorageChange = (_changes: { [key: string]: chrome.storage.StorageChange }, areaName: string) => {
+      if (areaName === 'sync') {
+        getStoredSettings().then((s) => setSettings(s));
+      }
+    };
+
+    if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
+      chrome.storage.onChanged.addListener(handleStorageChange);
+    }
+
+    return () => {
+      if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
+        chrome.storage.onChanged.removeListener(handleStorageChange);
+      }
+    };
   }, []);
 
   // Re-run markdown conversion whenever settings or extracted page changes
@@ -67,6 +86,12 @@ export default function App() {
     try {
       const loadedSettings = await getStoredSettings();
       setSettings(loadedSettings);
+      const currentLang = loadedSettings.language || 'en';
+
+      if (typeof document !== 'undefined') {
+        document.documentElement.lang = currentLang;
+        document.title = currentLang === 'pt-BR' ? 'Web2MD - Conversor Web para Markdown' : 'Web2MD - Web Page to Markdown';
+      }
 
       // Query current active browser tab
       if (typeof chrome !== 'undefined' && chrome.tabs) {
@@ -74,7 +99,7 @@ export default function App() {
         const isFileAllowed = await checkFileSchemeAccess();
 
         if (!tab || !tab.id) {
-          setErrorMsg('No active web page detected.');
+          setErrorMsg(t(currentLang, 'popup.errorNoActiveTab'));
           setLoading(false);
           return;
         }
@@ -83,9 +108,9 @@ export default function App() {
         if (!tab.url) {
           if (!isFileAllowed) {
             setFileAccessPrompt(true);
-            setErrorMsg('Local file detected, but file access is not enabled in your browser settings.');
+            setErrorMsg(t(currentLang, 'popup.errorLocalFileDetected'));
           } else {
-            setErrorMsg('No active web page detected.');
+            setErrorMsg(t(currentLang, 'popup.errorNoActiveTab'));
           }
           setLoading(false);
           return;
@@ -94,14 +119,14 @@ export default function App() {
         // Case 2: tab.url is a local file (file://) but file access permission is not granted
         if (tab.url.startsWith('file://') && !isFileAllowed) {
           setFileAccessPrompt(true);
-          setErrorMsg('Local file access is disabled in browser settings.');
+          setErrorMsg(t(currentLang, 'popup.errorLocalFileRestricted'));
           setLoading(false);
           return;
         }
 
         // Case 3: internal browser pages that cannot be accessed
         if (isRestrictedUrl(tab.url)) {
-          setErrorMsg('Internal browser pages (chrome://, edge://, extensions) cannot be converted to Markdown.');
+          setErrorMsg(t(currentLang, 'popup.errorInternalPage'));
           setLoading(false);
           return;
         }
@@ -123,13 +148,13 @@ export default function App() {
       } else {
         // Fallback demo state for standalone dev preview
         const demoData: ExtractedPage = {
-          title: 'Welcome to Web2MD Extension',
-          contentHtml: '<h1>Web2MD Demo</h1><p>Convert any web page to clean Markdown instantaneously.</p>',
-          textContent: 'Welcome to Web2MD Extension. Convert any web page to clean Markdown instantaneously.',
+          title: t(currentLang, 'popup.demoTitle'),
+          contentHtml: t(currentLang, 'popup.demoContentHtml'),
+          textContent: t(currentLang, 'popup.demoTextContent'),
           url: 'https://example.com/demo',
           domain: 'example.com',
           metadata: {
-            title: 'Welcome to Web2MD Extension',
+            title: t(currentLang, 'popup.demoTitle'),
             url: 'https://example.com/demo',
             domain: 'example.com',
             extractedAt: new Date().toISOString(),
@@ -139,14 +164,19 @@ export default function App() {
         setLoading(false);
       }
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : 'Failed to initialize Web2MD');
+      setErrorMsg(
+        t(lang, 'popup.errorInitFailed', {
+          error: err instanceof Error ? err.message : 'Unknown error',
+        })
+      );
       setLoading(false);
     }
   }
 
-  function injectAndExtract(tabId: number, tabUrl: string, _loadedSettings: UserSettings) {
+  function injectAndExtract(tabId: number, tabUrl: string, loadedSettings: UserSettings) {
+    const currentLang = loadedSettings.language || 'en';
     if (!chrome.scripting) {
-      setErrorMsg('Scripting permission unavailable for active tab.');
+      setErrorMsg(t(currentLang, 'popup.errorScriptingUnavailable'));
       setLoading(false);
       return;
     }
@@ -161,9 +191,9 @@ export default function App() {
           const errMsg = chrome.runtime.lastError.message || '';
           if (tabUrl.startsWith('file://') || errMsg.toLowerCase().includes('file')) {
             setFileAccessPrompt(true);
-            setErrorMsg('Local file access required: please ensure "Allow access to file URLs" is enabled.');
+            setErrorMsg(t(currentLang, 'popup.errorLocalPermissionRequired'));
           } else {
-            setErrorMsg(`Unable to read page content: ${errMsg}`);
+            setErrorMsg(t(currentLang, 'popup.errorReadFailed', { error: errMsg }));
           }
           setLoading(false);
           return;
@@ -177,7 +207,7 @@ export default function App() {
             if (response && response.success && response.data) {
               setExtracted(response.data);
             } else {
-              setErrorMsg('Could not extract main article content from page.');
+              setErrorMsg(t(currentLang, 'popup.errorExtractFailed'));
             }
             setLoading(false);
           }
@@ -277,13 +307,13 @@ export default function App() {
         <div className="brand">
           <div className="brand-icon">M↓</div>
           <span className="brand-title">Web2MD</span>
-          <span className="brand-tag">v1.0.1</span>
+          <span className="brand-tag">v1.1.0</span>
         </div>
         <div className="header-actions">
-          <button className="btn-icon" onClick={initPopup} title="Refresh Extraction">
+          <button className="btn-icon" onClick={initPopup} title={t(lang, 'popup.refreshTooltip')}>
             <RefreshCw size={15} />
           </button>
-          <button className="btn-icon" onClick={openOptionsPage} title="Extension Settings">
+          <button className="btn-icon" onClick={openOptionsPage} title={t(lang, 'popup.settingsTooltip')}>
             <Settings size={15} />
           </button>
         </div>
@@ -292,26 +322,28 @@ export default function App() {
       {loading ? (
         <div className="alert-box">
           <div className="spinner"></div>
-          <p className="alert-title">Reading & Converting Page...</p>
+          <p className="alert-title">{t(lang, 'popup.readingAndConverting')}</p>
         </div>
       ) : errorMsg ? (
         <div className="alert-box">
           <AlertTriangle className="alert-icon" />
-          <p className="alert-title">{fileAccessPrompt ? 'Local File Access Required' : 'Page Unavailable'}</p>
+          <p className="alert-title">
+            {fileAccessPrompt
+              ? t(lang, 'popup.localFileAccessRequiredTitle')
+              : t(lang, 'popup.pageUnavailableTitle')}
+          </p>
           <p className="alert-desc">{errorMsg}</p>
           {fileAccessPrompt && (
             <div className="file-access-card">
-              <p className="file-access-tip">
-                Edge and Chrome require user permission to read local files (<code>file:///...</code>):
-              </p>
+              <p className="file-access-tip">{t(lang, 'popup.localFileAccessTip')}</p>
               <ol className="file-access-steps">
-                <li>Click <strong>&quot;Open Extension Settings&quot;</strong> below</li>
-                <li>Toggle ON <strong>&quot;Allow access to file URLs&quot;</strong></li>
-                <li>Return to your local file and click <strong>Refresh</strong> (or reopen Web2MD)</li>
+                <li>{t(lang, 'popup.localFileStep1')}</li>
+                <li>{t(lang, 'popup.localFileStep2')}</li>
+                <li>{t(lang, 'popup.localFileStep3')}</li>
               </ol>
               <button className="btn-primary file-access-btn" onClick={openExtensionDetails}>
                 <ExternalLink size={13} style={{ marginRight: '6px' }} />
-                Open Extension Settings
+                {t(lang, 'popup.openExtensionSettingsBtn')}
               </button>
             </div>
           )}
@@ -326,7 +358,9 @@ export default function App() {
               ) : (
                 <Globe size={13} className="url-domain" />
               )}
-              <span className="url-domain">{extracted.domain}</span>
+              <span className="url-domain">
+                {extracted.domain === 'local file' ? t(lang, 'common.localFile') : extracted.domain}
+              </span>
               <span className="url-path">{extracted.url}</span>
             </div>
           )}
@@ -334,28 +368,34 @@ export default function App() {
           {/* Statistics Bar */}
           {result && (
             <div className="stats-bar">
-              <div className="stat-item" title="Word count">
+              <div className="stat-item" title={t(lang, 'popup.wordCountTooltip')}>
                 <FileText size={12} />
-                <span>Words:</span>
+                <span>{t(lang, 'common.words')}:</span>
                 <span className="stat-value">{result.wordCount}</span>
               </div>
-              <div className="stat-item" title="Character count">
+              <div className="stat-item" title={t(lang, 'popup.charCountTooltip')}>
                 <FileCode size={12} />
-                <span>Chars:</span>
+                <span>{t(lang, 'common.chars')}:</span>
                 <span className="stat-value">{result.charCount}</span>
               </div>
-              <div className="stat-item" title="Reading time">
+              <div className="stat-item" title={t(lang, 'popup.readingTimeTooltip')}>
                 <Clock size={12} />
-                <span>Time:</span>
-                <span className="stat-value">{result.readingTimeMinutes} min</span>
+                <span>{t(lang, 'common.time')}:</span>
+                <span className="stat-value">
+                  {result.readingTimeMinutes} {t(lang, 'common.min')}
+                </span>
               </div>
-              <div className="stat-item" title="Images count">
+              <div className="stat-item" title={t(lang, 'popup.imagesCountTooltip')}>
                 <ImageIcon size={12} />
-                <span className="stat-value">{result.imageCount} imgs</span>
+                <span className="stat-value">
+                  {result.imageCount} {t(lang, 'common.imagesCount')}
+                </span>
               </div>
-              <div className="stat-item" title="Links count">
+              <div className="stat-item" title={t(lang, 'popup.linksCountTooltip')}>
                 <LinkIcon size={12} />
-                <span className="stat-value">{result.linkCount} links</span>
+                <span className="stat-value">
+                  {result.linkCount} {t(lang, 'common.linksCount')}
+                </span>
               </div>
             </div>
           )}
@@ -370,33 +410,33 @@ export default function App() {
                   onClick={() => setActiveTab('editor')}
                 >
                   <Edit3 size={13} />
-                  Editor
+                  {t(lang, 'popup.tabEditor')}
                 </button>
                 <button
                   className={`tab-btn ${activeTab === 'preview' ? 'active' : ''}`}
                   onClick={() => setActiveTab('preview')}
                 >
                   <Eye size={13} />
-                  Preview
+                  {t(lang, 'popup.tabPreview')}
                 </button>
               </div>
 
               <div className="quick-toggles">
-                <label className="toggle-chip" title="Include YAML Frontmatter metadata header">
+                <label className="toggle-chip" title={t(lang, 'popup.frontmatterTooltip')}>
                   <input
                     type="checkbox"
                     checked={settings?.includeFrontmatter ?? true}
                     onChange={handleToggleFrontmatter}
                   />
-                  Frontmatter
+                  {t(lang, 'popup.frontmatterToggle')}
                 </label>
-                <label className="toggle-chip" title="Include images in markdown output">
+                <label className="toggle-chip" title={t(lang, 'popup.imagesTooltip')}>
                   <input
                     type="checkbox"
                     checked={settings?.includeImages ?? true}
                     onChange={handleToggleImages}
                   />
-                  Images
+                  {t(lang, 'popup.imagesToggle')}
                 </label>
               </div>
             </div>
@@ -408,7 +448,7 @@ export default function App() {
                   className="markdown-editor"
                   value={customMarkdown}
                   onChange={(e) => setCustomMarkdown(e.target.value)}
-                  placeholder="Markdown output will appear here..."
+                  placeholder={t(lang, 'popup.editorPlaceholder')}
                 />
               ) : (
                 <div className="markdown-preview">
@@ -417,7 +457,7 @@ export default function App() {
               )}
             </div>
 
-            {copied && <div className="toast-success">Copied to Clipboard!</div>}
+            {copied && <div className="toast-success">{t(lang, 'popup.copiedToast')}</div>}
           </div>
 
           {/* Footer Controls */}
@@ -428,16 +468,16 @@ export default function App() {
                 className="filename-input"
                 value={filename}
                 onChange={(e) => setFilename(e.target.value)}
-                placeholder="filename.md"
+                placeholder={t(lang, 'popup.filenamePlaceholder')}
               />
             </div>
-            <button className="btn-secondary" onClick={handleCopy} title="Copy Markdown to Clipboard">
+            <button className="btn-secondary" onClick={handleCopy} title={t(lang, 'popup.copyTooltip')}>
               {copied ? <Check size={14} color="#10B981" /> : <Copy size={14} />}
-              {copied ? 'Copied' : 'Copy'}
+              {copied ? t(lang, 'popup.copiedBtn') : t(lang, 'popup.copyBtn')}
             </button>
-            <button className="btn-primary" onClick={handleDownload} title="Download .md File">
+            <button className="btn-primary" onClick={handleDownload} title={t(lang, 'popup.saveTooltip')}>
               <Download size={14} />
-              Save .md
+              {t(lang, 'popup.saveBtn')}
             </button>
           </footer>
         </>

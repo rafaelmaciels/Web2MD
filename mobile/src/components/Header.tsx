@@ -7,9 +7,10 @@ interface HeaderProps {
   onRefresh?: () => void;
   onOpenSettings?: () => void;
   activeTabTitle?: string;
+  subtitle?: string;
 }
 
-export const Header: React.FC<HeaderProps> = ({ onRefresh, onOpenSettings }) => {
+export const Header: React.FC<HeaderProps> = ({ onRefresh, onOpenSettings, subtitle }) => {
   return (
     <View style={styles.header}>
       <View style={styles.brandRow}>
@@ -25,7 +26,9 @@ export const Header: React.FC<HeaderProps> = ({ onRefresh, onOpenSettings }) => 
               <Text style={styles.versionText}>v1.0</Text>
             </View>
           </View>
-          <Text style={styles.brandSubtitle}>Conversor Web para Markdown</Text>
+          <Text style={styles.brandSubtitle}>
+            {subtitle || 'Conversor Web para Markdown'}
+          </Text>
         </View>
       </View>
 

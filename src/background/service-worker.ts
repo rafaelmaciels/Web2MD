@@ -1,21 +1,46 @@
 import { convertToMarkdown } from '../core/markdown';
 import { getStoredSettings } from '../core/storage';
-import { ExtensionMessage, ExtensionResponse, ExtractedPage } from '../shared/types';
+import { ExtensionMessage, ExtensionResponse, ExtractedPage, Language } from '../shared/types';
+import { t } from '../shared/i18n';
 
-// Context menu setup on extension install
-chrome.runtime.onInstalled.addListener(() => {
-  chrome.contextMenus.create({
-    id: 'web2md-convert-page',
-    title: 'Web2MD: Convert page to Markdown',
-    contexts: ['page'],
-  });
+// Update context menu titles based on language
+function updateContextMenus(lang: Language = 'en') {
+  if (typeof chrome === 'undefined' || !chrome.contextMenus) return;
 
-  chrome.contextMenus.create({
-    id: 'web2md-convert-selection',
-    title: 'Web2MD: Convert selection to Markdown',
-    contexts: ['selection'],
+  chrome.contextMenus.removeAll(() => {
+    chrome.contextMenus.create({
+      id: 'web2md-convert-page',
+      title: t(lang, 'contextMenus.convertPage'),
+      contexts: ['page'],
+    });
+
+    chrome.contextMenus.create({
+      id: 'web2md-convert-selection',
+      title: t(lang, 'contextMenus.convertSelection'),
+      contexts: ['selection'],
+    });
   });
+}
+
+// Context menu setup on extension install / startup
+chrome.runtime.onInstalled.addListener(async () => {
+  const settings = await getStoredSettings();
+  updateContextMenus(settings.language || 'en');
 });
+
+chrome.runtime.onStartup?.addListener(async () => {
+  const settings = await getStoredSettings();
+  updateContextMenus(settings.language || 'en');
+});
+
+// Reactively update context menu titles when language changes in options
+if (typeof chrome !== 'undefined' && chrome.storage?.onChanged) {
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (area === 'sync' && changes.language && changes.language.newValue) {
+      updateContextMenus(changes.language.newValue as Language);
+    }
+  });
+}
 
 // Handle Context Menu item clicks
 chrome.contextMenus.onClicked.addListener(async (info, tab) => {

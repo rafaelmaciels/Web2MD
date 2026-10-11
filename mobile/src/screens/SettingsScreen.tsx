@@ -9,7 +9,7 @@ import {
   Switch,
 } from 'react-native';
 import { Ionicons, Feather } from '@expo/vector-icons';
-import { UserSettings } from '../types';
+import { UserSettings, Language } from '../types';
 import { saveMobileSettings } from '../services/storage';
 import { THEME } from '../types/theme';
 
@@ -24,6 +24,8 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 }) => {
   const [localSettings, setLocalSettings] = useState<UserSettings>(settings);
   const [saved, setSaved] = useState<boolean>(false);
+
+  const isPt = localSettings.language === 'pt-BR';
 
   async function updateSetting<K extends keyof UserSettings>(
     key: K,
@@ -43,30 +45,98 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       {saved && (
         <View style={styles.saveBadge}>
           <Ionicons name="checkmark-circle" size={14} color={THEME.colors.success} />
-          <Text style={styles.saveBadgeText}>Preferência salva com sucesso</Text>
+          <Text style={styles.saveBadgeText}>
+            {isPt ? 'Preferência salva com sucesso' : 'Preferences saved successfully'}
+          </Text>
         </View>
       )}
 
       {/* Header Info */}
       <View style={styles.headerBox}>
-        <Text style={styles.headerTitle}>Preferências de Conversão</Text>
-        <Text style={styles.headerDesc}>
-          As configurações são aplicadas diretamente às extrações de URLs e saídas de Markdown no seu smartphone.
+        <Text style={styles.headerTitle}>
+          {isPt ? 'Preferências de Conversão' : 'Conversion Preferences'}
         </Text>
+        <Text style={styles.headerDesc}>
+          {isPt
+            ? 'As configurações são aplicadas diretamente às extrações de URLs e saídas de Markdown no seu smartphone.'
+            : 'Settings are applied directly to URL extractions and Markdown outputs on your smartphone.'}
+        </Text>
+      </View>
+
+      {/* Section 0: Language */}
+      <View style={styles.card}>
+        <View style={styles.sectionHeader}>
+          <Feather name="globe" size={16} color={THEME.colors.primaryAccent} />
+          <Text style={styles.sectionTitle}>
+            {isPt ? 'Idioma da Interface' : 'Interface Language'}
+          </Text>
+        </View>
+
+        <View style={styles.optionBlock}>
+          <Text style={styles.rowLabel}>
+            {isPt ? 'Idioma' : 'Language'}
+          </Text>
+          <Text style={styles.rowDesc}>
+            {isPt
+              ? 'Selecione o idioma de exibição do aplicativo'
+              : 'Choose your preferred display language for the application'}
+          </Text>
+          <View style={styles.pillGroup}>
+            <TouchableOpacity
+              style={[
+                styles.pill,
+                localSettings.language !== 'pt-BR' && styles.pillActive,
+              ]}
+              onPress={() => updateSetting('language', 'en')}
+            >
+              <Text
+                style={[
+                  styles.pillText,
+                  localSettings.language !== 'pt-BR' && styles.pillTextActive,
+                ]}
+              >
+                {isPt ? 'English (Default) — Inglês (Padrão)' : 'English (Default)'}
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.pill,
+                localSettings.language === 'pt-BR' && styles.pillActive,
+              ]}
+              onPress={() => updateSetting('language', 'pt-BR')}
+            >
+              <Text
+                style={[
+                  styles.pillText,
+                  localSettings.language === 'pt-BR' && styles.pillTextActive,
+                ]}
+              >
+                Português (Brasil)
+              </Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </View>
 
       {/* Section 1: Content & Metadata */}
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
           <Feather name="sliders" size={16} color={THEME.colors.primaryAccent} />
-          <Text style={styles.sectionTitle}>Padrões de Conteúdo e Metadados</Text>
+          <Text style={styles.sectionTitle}>
+            {isPt ? 'Padrões de Conteúdo e Metadados' : 'Content & Metadata Defaults'}
+          </Text>
         </View>
 
         <View style={styles.row}>
           <View style={styles.rowInfo}>
-            <Text style={styles.rowLabel}>Incluir YAML Frontmatter</Text>
+            <Text style={styles.rowLabel}>
+              {isPt ? 'Incluir YAML Frontmatter' : 'Include YAML Frontmatter'}
+            </Text>
             <Text style={styles.rowDesc}>
-              Adiciona cabeçalho com título, URL, data, autor e domínio no topo do arquivo
+              {isPt
+                ? 'Adiciona cabeçalho com título, URL, data, autor e domínio no topo do arquivo'
+                : 'Adds header with title, URL, date, author, and domain at top of file'}
             </Text>
           </View>
           <Switch
@@ -81,9 +151,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         <View style={styles.row}>
           <View style={styles.rowInfo}>
-            <Text style={styles.rowLabel}>Incluir Imagens</Text>
+            <Text style={styles.rowLabel}>
+              {isPt ? 'Incluir Imagens' : 'Include Images'}
+            </Text>
             <Text style={styles.rowDesc}>
-              Converte tags HTML &lt;img&gt; na sintaxe Markdown ![alt](url)
+              {isPt
+                ? 'Converte tags HTML <img> na sintaxe Markdown ![alt](url)'
+                : 'Converts HTML <img> tags to Markdown syntax ![alt](url)'}
             </Text>
           </View>
           <Switch
@@ -98,9 +172,13 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         <View style={styles.row}>
           <View style={styles.rowInfo}>
-            <Text style={styles.rowLabel}>Incluir Hiperlinks</Text>
+            <Text style={styles.rowLabel}>
+              {isPt ? 'Incluir Hiperlinks' : 'Include Hyperlinks'}
+            </Text>
             <Text style={styles.rowDesc}>
-              Converte links HTML &lt;a&gt; na sintaxe Markdown [texto](url)
+              {isPt
+                ? 'Converte links HTML <a> na sintaxe Markdown [texto](url)'
+                : 'Converts HTML <a> links to Markdown syntax [anchor](url)'}
             </Text>
           </View>
           <Switch
@@ -116,12 +194,16 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
           <Feather name="code" size={16} color={THEME.colors.success} />
-          <Text style={styles.sectionTitle}>Estilo de Sintaxe Markdown</Text>
+          <Text style={styles.sectionTitle}>
+            {isPt ? 'Estilo de Sintaxe Markdown' : 'Markdown Syntax Styling'}
+          </Text>
         </View>
 
         {/* Heading Style */}
         <View style={styles.optionBlock}>
-          <Text style={styles.rowLabel}>Estilo de Títulos</Text>
+          <Text style={styles.rowLabel}>
+            {isPt ? 'Estilo de Títulos' : 'Heading Style'}
+          </Text>
           <View style={styles.pillGroup}>
             <TouchableOpacity
               style={[
@@ -136,7 +218,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   localSettings.headingStyle === 'atx' && styles.pillTextActive,
                 ]}
               >
-                ATX (# Título)
+                ATX (# {isPt ? 'Título' : 'Heading'})
               </Text>
             </TouchableOpacity>
 
@@ -153,7 +235,7 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
                   localSettings.headingStyle === 'setext' && styles.pillTextActive,
                 ]}
               >
-                Setext (Sublinhado)
+                Setext ({isPt ? 'Sublinhado' : 'Underlined'})
               </Text>
             </TouchableOpacity>
           </View>
@@ -163,7 +245,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         {/* Bullet List Marker */}
         <View style={styles.optionBlock}>
-          <Text style={styles.rowLabel}>Marcador de Lista Não-Ordenada</Text>
+          <Text style={styles.rowLabel}>
+            {isPt ? 'Marcador de Lista Não-Ordenada' : 'Bullet List Marker'}
+          </Text>
           <View style={styles.pillGroup}>
             {(['-', '*', '+'] as const).map((marker) => (
               <TouchableOpacity
@@ -191,7 +275,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
 
         {/* Code Block Fence */}
         <View style={styles.optionBlock}>
-          <Text style={styles.rowLabel}>Delimitador de Blocos de Código</Text>
+          <Text style={styles.rowLabel}>
+            {isPt ? 'Delimitador de Blocos de Código' : 'Code Block Fence'}
+          </Text>
           <View style={styles.pillGroup}>
             {(['```', '~~~'] as const).map((fence) => (
               <TouchableOpacity
@@ -220,13 +306,19 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       <View style={styles.card}>
         <View style={styles.sectionHeader}>
           <Feather name="folder" size={16} color={THEME.colors.warning} />
-          <Text style={styles.sectionTitle}>Regras de Exportação e Armazenamento</Text>
+          <Text style={styles.sectionTitle}>
+            {isPt ? 'Regras de Exportação e Armazenamento' : 'Export & Storage Rules'}
+          </Text>
         </View>
 
         <View style={styles.optionBlock}>
-          <Text style={styles.rowLabel}>Subpasta Padrão</Text>
+          <Text style={styles.rowLabel}>
+            {isPt ? 'Subpasta Padrão' : 'Default Subfolder'}
+          </Text>
           <Text style={styles.rowDesc}>
-            Usada para salvar ou categorizar os arquivos Markdown exportados
+            {isPt
+              ? 'Usada para salvar ou categorizar os arquivos Markdown exportados'
+              : 'Used to store and categorize exported Markdown files'}
           </Text>
           <TextInput
             style={styles.folderInput}
@@ -242,7 +334,9 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
       <View style={styles.ecosystemCard}>
         <View style={styles.sectionHeader}>
           <Feather name="shield" size={16} color={THEME.colors.info} />
-          <Text style={styles.sectionTitle}>Ecossistema Multiplataforma Web2MD</Text>
+          <Text style={styles.sectionTitle}>
+            {isPt ? 'Ecossistema Multiplataforma Web2MD' : 'Web2MD Multiplatform Ecosystem'}
+          </Text>
         </View>
 
         <View style={styles.platformRow}>
@@ -250,11 +344,17 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <Ionicons name="logo-chrome" size={18} color="#38BDF8" />
           </View>
           <View style={styles.platformTextCol}>
-            <Text style={styles.platformTitle}>Extensão Chrome</Text>
-            <Text style={styles.platformSubtitle}>Ativa no Desktop / Manifest v3</Text>
+            <Text style={styles.platformTitle}>
+              {isPt ? 'Extensão Chrome' : 'Chrome Extension'}
+            </Text>
+            <Text style={styles.platformSubtitle}>
+              {isPt ? 'Ativa no Desktop / Manifest v3' : 'Active on Desktop / Manifest v3'}
+            </Text>
           </View>
           <View style={styles.badgeActive}>
-            <Text style={styles.badgeActiveText}>Ativo</Text>
+            <Text style={styles.badgeActiveText}>
+              {isPt ? 'Ativo' : 'Active'}
+            </Text>
           </View>
         </View>
 
@@ -263,17 +363,25 @@ export const SettingsScreen: React.FC<SettingsScreenProps> = ({
             <Feather name="smartphone" size={18} color={THEME.colors.primaryAccent} />
           </View>
           <View style={styles.platformTextCol}>
-            <Text style={styles.platformTitle}>Aplicativo Mobile</Text>
-            <Text style={styles.platformSubtitle}>Motor Nativo React Native & Expo</Text>
+            <Text style={styles.platformTitle}>
+              {isPt ? 'Aplicativo Mobile' : 'Mobile App'}
+            </Text>
+            <Text style={styles.platformSubtitle}>
+              {isPt ? 'Motor Nativo React Native & Expo' : 'Native React Native & Expo Engine'}
+            </Text>
           </View>
           <View style={styles.badgeActive}>
-            <Text style={styles.badgeActiveText}>Ativo</Text>
+            <Text style={styles.badgeActiveText}>
+              {isPt ? 'Ativo' : 'Active'}
+            </Text>
           </View>
         </View>
 
         <View style={styles.footerBrandContainer}>
           <Text style={styles.versionFooter}>Web2MD Unified Core Engine v1.0.0</Text>
-          <Text style={styles.authorFooter}>Desenvolvido com ♥ por Rafael Maciel</Text>
+          <Text style={styles.authorFooter}>
+            {isPt ? 'Desenvolvido com ♥ por Rafael Maciel' : 'Developed with ♥ by Rafael Maciel'}
+          </Text>
         </View>
       </View>
     </ScrollView>
@@ -371,6 +479,7 @@ const styles = StyleSheet.create({
   },
   pillGroup: {
     flexDirection: 'row',
+    flexWrap: 'wrap',
     gap: 8,
     marginTop: 8,
   },
