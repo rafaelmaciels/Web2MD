@@ -486,24 +486,251 @@ export default function App() {
   );
 }
 
-// Lightweight Markdown Preview Renderer
+// Lightweight Markdown Preview Renderer with full Image & Media support
 function SimpleMarkdownViewer({ markdown }: { markdown: string }) {
   if (!markdown) return null;
 
   const lines = markdown.split('\n');
-  return (
-    <div>
-      {lines.map((line, idx) => {
-        if (line.startsWith('# ')) return <h1 key={idx}>{line.substring(2)}</h1>;
-        if (line.startsWith('## ')) return <h2 key={idx}>{line.substring(3)}</h2>;
-        if (line.startsWith('### ')) return <h3 key={idx}>{line.substring(4)}</h3>;
-        if (line.startsWith('#### ')) return <h4 key={idx}>{line.substring(5)}</h4>;
-        if (line.startsWith('> ')) return <blockquote key={idx}>{line.substring(2)}</blockquote>;
-        if (line.startsWith('```')) return <pre key={idx}><code>{line}</code></pre>;
-        if (line.startsWith('- ') || line.startsWith('* ')) return <li key={idx}>{line.substring(2)}</li>;
-        if (!line.trim()) return <br key={idx} />;
-        return <p key={idx}>{line}</p>;
-      })}
-    </div>
-  );
+  const elements: React.ReactNode[] = [];
+
+  let inFrontmatter = false;
+  let frontmatterBuffer: string[] = [];
+  let inCodeBlock = false;
+  let codeBuffer: string[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const rawLine = lines[i];
+    const line = rawLine.trim();
+
+    // 1. YAML Frontmatter Detection
+    if (i === 0 && line === '---') {
+      inFrontmatter = true;
+      continue;
+    }
+    if (inFrontmatter) {
+      if (line === '---') {
+        inFrontmatter = false;
+        elements.push(
+          <div key={`frontmatter-${i}`} className="preview-frontmatter">
+            <div className="preview-frontmatter-tag">YAML FRONTMATTER</div>
+            <pre>{frontmatterBuffer.join('\n')}</pre>
+          </div>
+        );
+        frontmatterBuffer = [];
+        continue;
+      }
+      frontmatterBuffer.push(rawLine);
+      continue;
+    }
+
+    // 2. Multi-line Code Blocks
+    if (line.startsWith('```') || line.startsWith('~~~')) {
+      if (inCodeBlock) {
+        inCodeBlock = false;
+        elements.push(
+          <pre key={`code-${i}`}>
+            <code>{codeBuffer.join('\n')}</code>
+          </pre>
+        );
+        codeBuffer = [];
+      } else {
+        inCodeBlock = true;
+      }
+      continue;
+    }
+
+    if (inCodeBlock) {
+      codeBuffer.push(rawLine);
+      continue;
+    }
+
+    // 3. Standalone Linked Image: [![alt](imgUrl)](linkUrl)
+    const linkedImgMatch = line.match(
+      /^\[!\[(.*?)\]\(\s*([^\s\)]+)(?:\s+["'][^"']*["'])?\s*\)\]\(\s*([^\s\)]+)(?:\s+["'][^"']*["'])?\s*\)$/
+    );
+    if (linkedImgMatch) {
+      const altText = linkedImgMatch[1];
+      const imgUrl = linkedImgMatch[2];
+      const linkUrl = linkedImgMatch[3];
+      elements.push(
+        <div key={`linked-img-${i}`} className="preview-image-container">
+          <a href={linkUrl} target="_blank" rel="noopener noreferrer" title={altText || linkUrl}>
+            <img
+              src={imgUrl}
+              alt={altText}
+              loading="lazy"
+              onError={(e) => {
+                const img = e.currentTarget;
+                img.style.display = 'none';
+                const parent = img.parentElement?.parentElement;
+                const fallback = parent?.querySelector('.preview-image-fallback') as HTMLElement;
+                if (fallback) fallback.style.display = 'flex';
+              }}
+            />
+          </a>
+          <div className="preview-image-fallback" style={{ display: 'none' }}>
+            <ImageIcon size={14} />
+            <span>{altText || 'Imagem'} ({imgUrl})</span>
+          </div>
+          {altText && <span className="preview-image-caption">{altText}</span>}
+        </div>
+      );
+      continue;
+    }
+
+    // 4. Standalone Image: ![alt](imgUrl)
+    const imgMatch = line.match(/^!\[(.*?)\]\(\s*([^\s\)]+)(?:\s+["'][^"']*["'])?\s*\)$/);
+    if (imgMatch) {
+      const altText = imgMatch[1];
+      const imgUrl = imgMatch[2];
+      elements.push(
+        <div key={`img-${i}`} className="preview-image-container">
+          <img
+            src={imgUrl}
+            alt={altText}
+            loading="lazy"
+            onError={(e) => {
+              const img = e.currentTarget;
+              img.style.display = 'none';
+              const parent = img.parentElement;
+              const fallback = parent?.querySelector('.preview-image-fallback') as HTMLElement;
+              if (fallback) fallback.style.display = 'flex';
+            }}
+          />
+          <div className="preview-image-fallback" style={{ display: 'none' }}>
+            <ImageIcon size={14} />
+            <span>{altText || 'Imagem'} ({imgUrl})</span>
+          </div>
+          {altText && <span className="preview-image-caption">{altText}</span>}
+        </div>
+      );
+      continue;
+    }
+
+    // 5. Headings
+    if (line.startsWith('# ')) {
+      elements.push(<h1 key={i}>{renderInlineContent(line.substring(2))}</h1>);
+      continue;
+    }
+    if (line.startsWith('## ')) {
+      elements.push(<h2 key={i}>{renderInlineContent(line.substring(3))}</h2>);
+      continue;
+    }
+    if (line.startsWith('### ')) {
+      elements.push(<h3 key={i}>{renderInlineContent(line.substring(4))}</h3>);
+      continue;
+    }
+    if (line.startsWith('#### ')) {
+      elements.push(<h4 key={i}>{renderInlineContent(line.substring(5))}</h4>);
+      continue;
+    }
+    if (line.startsWith('##### ')) {
+      elements.push(<h5 key={i}>{renderInlineContent(line.substring(6))}</h5>);
+      continue;
+    }
+    if (line.startsWith('###### ')) {
+      elements.push(<h6 key={i}>{renderInlineContent(line.substring(7))}</h6>);
+      continue;
+    }
+
+    // 6. Blockquote
+    if (line.startsWith('> ')) {
+      elements.push(<blockquote key={i}>{renderInlineContent(line.substring(2))}</blockquote>);
+      continue;
+    }
+
+    // 7. Horizontal Rule
+    if (line === '---' || line === '***' || line === '___') {
+      elements.push(<hr key={i} />);
+      continue;
+    }
+
+    // 8. Lists
+    if (line.startsWith('- ') || line.startsWith('* ') || line.startsWith('+ ')) {
+      elements.push(<li key={i}>{renderInlineContent(line.substring(2))}</li>);
+      continue;
+    }
+    if (/^\d+\.\s/.test(line)) {
+      elements.push(<li key={i}>{renderInlineContent(line.replace(/^\d+\.\s/, ''))}</li>);
+      continue;
+    }
+
+    // 9. Blank line
+    if (!line) {
+      elements.push(<br key={i} />);
+      continue;
+    }
+
+    // 10. Regular Paragraph with inline formatting
+    elements.push(<p key={i}>{renderInlineContent(rawLine)}</p>);
+  }
+
+  // Handle unclosed code block if any
+  if (inCodeBlock && codeBuffer.length > 0) {
+    elements.push(
+      <pre key="unclosed-code">
+        <code>{codeBuffer.join('\n')}</code>
+      </pre>
+    );
+  }
+
+  return <div>{elements}</div>;
+}
+
+// Inline Markdown Parser for bold, italic, inline code, links and inline images
+function renderInlineContent(text: string): React.ReactNode {
+  const pattern = /(!?\[.*?\]\([^\s\)]+(?:\s+["'][^"']*["'])?\)|`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g;
+  const parts = text.split(pattern);
+
+  return parts.map((part, index) => {
+    if (!part) return null;
+
+    // Inline image: ![alt](url)
+    const imgMatch = part.match(/^!\[(.*?)\]\(\s*([^\s\)]+)(?:\s+["'](.*?)["'])?\s*\)$/);
+    if (imgMatch) {
+      const alt = imgMatch[1];
+      const src = imgMatch[2];
+      return (
+        <img
+          key={index}
+          src={src}
+          alt={alt}
+          className="inline-image"
+          loading="lazy"
+          onError={(e) => {
+            (e.currentTarget as HTMLElement).style.display = 'none';
+          }}
+        />
+      );
+    }
+
+    // Inline link: [text](url)
+    const linkMatch = part.match(/^\[(.*?)\]\(\s*([^\s\)]+)(?:\s+["'](.*?)["'])?\s*\)$/);
+    if (linkMatch) {
+      const linkText = linkMatch[1];
+      const href = linkMatch[2];
+      return (
+        <a key={index} href={href} target="_blank" rel="noopener noreferrer">
+          {linkText}
+        </a>
+      );
+    }
+
+    // Inline code: `code`
+    if (part.startsWith('`') && part.endsWith('`') && part.length >= 2) {
+      return <code key={index}>{part.slice(1, -1)}</code>;
+    }
+
+    // Bold: **text**
+    if (part.startsWith('**') && part.endsWith('**') && part.length >= 4) {
+      return <strong key={index}>{part.slice(2, -2)}</strong>;
+    }
+
+    // Italic: *text*
+    if (part.startsWith('*') && part.endsWith('*') && part.length >= 2) {
+      return <em key={index}>{part.slice(1, -1)}</em>;
+    }
+
+    return part;
+  });
 }

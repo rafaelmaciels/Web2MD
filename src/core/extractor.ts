@@ -19,9 +19,15 @@ export function extractPageContent(doc: Document, targetUrl?: string): Extracted
 
   // Clone document to avoid modifying active page
   const docClone = doc.cloneNode(true) as Document;
+
+  // Pre-normalize images to ensure lazy-loading attributes & relative paths are resolved
+  normalizeImages(docClone, currentUrl);
   
   // Clean cloned DOM
   const cleanedDoc = cleanDOM(docClone);
+
+  // Normalize images once more on cleanedDoc
+  normalizeImages(cleanedDoc, currentUrl);
 
   // Attempt Readability extraction
   let article: ReturnType<Readability['parse']> = null;
@@ -93,3 +99,67 @@ function getMetaContent(doc: Document, names: string[]): string | null {
   }
   return null;
 }
+
+function normalizeImages(doc: Document, baseUrl: string) {
+  const images = doc.querySelectorAll('img');
+  images.forEach((img) => {
+    // 1. Resolve lazy-loading data attributes if src is missing or a placeholder
+    const rawSrc = img.getAttribute('src') || '';
+    const dataSrc =
+      img.getAttribute('data-src') ||
+      img.getAttribute('data-original') ||
+      img.getAttribute('data-lazy-src') ||
+      img.getAttribute('data-actualsrc') ||
+      img.getAttribute('data-orig-file') ||
+      img.getAttribute('data-hi-res-src');
+    const srcset = img.getAttribute('srcset') || img.getAttribute('data-srcset');
+
+    let bestSrc = rawSrc;
+    const isPlaceholder = !rawSrc || rawSrc.startsWith('data:image') || rawSrc.startsWith('blob:');
+
+    if (isPlaceholder && dataSrc) {
+      bestSrc = dataSrc;
+    } else if (isPlaceholder && srcset) {
+      const firstSrc = srcset.split(',')[0].trim().split(/\s+/)[0];
+      if (firstSrc) bestSrc = firstSrc;
+    }
+
+    // Check parent <picture> element if still placeholder or empty
+    if ((!bestSrc || bestSrc.startsWith('data:image')) && img.parentElement?.tagName.toUpperCase() === 'PICTURE') {
+      const sources = img.parentElement.querySelectorAll('source');
+      for (let i = 0; i < sources.length; i++) {
+        const sSrcset = sources[i].getAttribute('srcset') || sources[i].getAttribute('data-srcset');
+        if (sSrcset) {
+          const cand = sSrcset.split(',')[0].trim().split(/\s+/)[0];
+          if (cand && !cand.startsWith('data:image')) {
+            bestSrc = cand;
+            break;
+          }
+        }
+      }
+    }
+
+    if (!bestSrc || bestSrc.startsWith('data:image')) {
+      return;
+    }
+
+    // 2. Resolve relative or protocol-relative URLs
+    if (bestSrc.startsWith('//')) {
+      bestSrc = 'https:' + bestSrc;
+    } else if (!/^https?:\/\//i.test(bestSrc) && !bestSrc.startsWith('file://')) {
+      try {
+        bestSrc = new URL(bestSrc, baseUrl).href;
+      } catch {
+        // Keep as is if URL construction fails
+      }
+    }
+
+    img.setAttribute('src', bestSrc);
+    // Unset inline hidden display to ensure readability and downstream parsers retain it
+    if (img.style.display === 'none' || img.style.visibility === 'hidden') {
+      img.style.display = '';
+      img.style.visibility = '';
+    }
+  });
+}
+

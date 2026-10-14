@@ -332,6 +332,114 @@ body {
   margin-bottom: 10px;
 }
 
+/* Image & Media Preview Styles */
+.preview-image-container {
+  margin: 12px 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  overflow: hidden;
+}
+
+.preview-image-container a {
+  display: block;
+  max-width: 100%;
+}
+
+.preview-image-container img {
+  max-width: 100%;
+  max-height: 280px;
+  height: auto;
+  border-radius: var(--radius-sm);
+  display: block;
+  object-fit: contain;
+  transition: transform 0.2s ease;
+}
+
+.preview-image-container img:hover {
+  transform: scale(1.01);
+}
+
+.preview-image-caption {
+  margin-top: 6px;
+  font-size: 11px;
+  color: var(--text-muted);
+  text-align: center;
+  font-style: italic;
+}
+
+.preview-image-fallback {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border: 1px dashed rgba(239, 68, 68, 0.3);
+  border-radius: var(--radius-sm);
+  color: #fca5a5;
+  font-size: 11px;
+  word-break: break-all;
+}
+
+.markdown-preview img.inline-image {
+  max-height: 22px;
+  vertical-align: middle;
+  border-radius: 3px;
+  margin: 0 4px;
+}
+
+.preview-frontmatter {
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid var(--border-color);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  margin-bottom: 14px;
+}
+
+.preview-frontmatter-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  color: var(--accent);
+  margin-bottom: 4px;
+  text-transform: uppercase;
+}
+
+.preview-frontmatter pre {
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.markdown-preview a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+.markdown-preview a:hover {
+  text-decoration: underline;
+  color: #818cf8;
+}
+
+.markdown-preview hr {
+  border: 0;
+  height: 1px;
+  background: var(--border-color);
+  margin: 16px 0;
+}
+
 /* Footer & Controls */
 .app-footer {
   display: flex;

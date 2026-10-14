@@ -71,7 +71,7 @@ export const ptBR: TranslationSchema = {
     errorReadFailed: 'Não foi possível ler o conteúdo da página: {error}',
     errorExtractFailed: 'Não foi possível extrair o conteúdo principal do artigo da página.',
     demoTitle: 'Bem-vindo à Extensão Web2MD',
-    demoContentHtml: '<h1>Demonstração Web2MD</h1><p>Converta qualquer página web em Markdown limpo instantaneamente.</p>',
+    demoContentHtml: '<h1>Demonstração Web2MD</h1><p>Converta qualquer página web em Markdown limpo instantaneamente.</p><p><img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&auto=format&fit=crop&q=80" alt="Área de trabalho com notebook" /></p>',
     demoTextContent: 'Bem-vindo à Extensão Web2MD. Converta qualquer página web em Markdown limpo instantaneamente.',
   },
   options: {

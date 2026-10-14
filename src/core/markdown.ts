@@ -56,6 +56,53 @@ export function convertToMarkdown(
       filter: 'img',
       replacement: () => '',
     });
+  } else {
+    turndown.addRule('resolveImages', {
+      filter: 'img',
+      replacement: (_content, node) => {
+        const el = node as HTMLElement;
+        const rawSrc = el.getAttribute('src') || '';
+        const dataSrc =
+          el.getAttribute('data-src') ||
+          el.getAttribute('data-original') ||
+          el.getAttribute('data-lazy-src') ||
+          el.getAttribute('data-actualsrc') ||
+          el.getAttribute('data-orig-file') ||
+          el.getAttribute('data-hi-res-src');
+        const srcset = el.getAttribute('srcset') || el.getAttribute('data-srcset');
+
+        let src = rawSrc;
+        const isPlaceholder = !rawSrc || rawSrc.startsWith('data:image') || rawSrc.startsWith('blob:');
+
+        if (isPlaceholder && dataSrc) {
+          src = dataSrc;
+        } else if (isPlaceholder && srcset) {
+          const first = srcset.split(',')[0].trim().split(/\s+/)[0];
+          if (first) src = first;
+        }
+
+        if (!src || src.startsWith('data:image')) {
+          return '';
+        }
+
+        // Convert protocol-relative or relative to absolute URL
+        if (src.startsWith('//')) {
+          src = 'https:' + src;
+        } else if (extracted.url && !/^https?:\/\//i.test(src) && !src.startsWith('file://')) {
+          try {
+            src = new URL(src, extracted.url).href;
+          } catch {
+            // Keep as is
+          }
+        }
+
+        const alt = (el.getAttribute('alt') || '').replace(/[\[\]]/g, '').trim();
+        const title = el.getAttribute('title');
+        const titlePart = title ? ` "${title.replace(/"/g, '\\"')}"` : '';
+
+        return `![${alt}](${src}${titlePart})`;
+      },
+    });
   }
 
   // Handle link toggle
@@ -63,6 +110,29 @@ export function convertToMarkdown(
     turndown.addRule('stripLinks', {
       filter: 'a',
       replacement: (content) => content,
+    });
+  } else {
+    turndown.addRule('resolveLinks', {
+      filter: (node) => node.nodeName === 'A' && Boolean(node.getAttribute('href')),
+      replacement: (content, node) => {
+        const el = node as HTMLElement;
+        let href = el.getAttribute('href') || '';
+        if (href.startsWith('#') || href.startsWith('javascript:')) {
+          return content;
+        }
+        if (href.startsWith('//')) {
+          href = 'https:' + href;
+        } else if (extracted.url && !/^https?:\/\//i.test(href) && !href.startsWith('mailto:') && !href.startsWith('file://')) {
+          try {
+            href = new URL(href, extracted.url).href;
+          } catch {
+            // Keep as is
+          }
+        }
+        const title = el.getAttribute('title');
+        const titlePart = title ? ` "${title.replace(/"/g, '\\"')}"` : '';
+        return `[${content}](${href}${titlePart})`;
+      },
     });
   }
 
@@ -125,6 +195,6 @@ export function convertToMarkdown(
     charCount,
     readingTimeMinutes,
     imageCount: imageMatches.length,
-    linkCount: linkMatches.length - imageMatches.length,
+    linkCount: Math.max(0, linkMatches.length - imageMatches.length),
   };
 }

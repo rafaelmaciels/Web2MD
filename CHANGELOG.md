@@ -2,6 +2,18 @@
 
 All notable changes to the Web2MD extension project will be documented in this file.
 
+## [1.1.1] - 2026-10-14
+
+### Fixed & Improved
+- **Image Extraction and Preview Rendering**:
+  - Fixed images not displaying in Markdown Preview tab by adding dedicated image component and inline parser to `SimpleMarkdownViewer`.
+  - Added lazy-loading resolution for `data-src`, `data-original`, `data-lazy-src`, `data-actualsrc`, `srcset`, and `<picture>` elements in `extractor.ts` and `markdown.ts`.
+  - Fixed relative and protocol-relative URLs (`/path`, `//domain`) automatically converting to fully-qualified absolute URLs.
+  - Prevented `cleanDOM` from erroneously removing hidden or lazy-loaded article images, figures, and picture tags.
+  - Added visual error fallback for broken external images and styled image captions.
+  - Enhanced mobile Markdown viewer image regexes to support titles and various URL schemes.
+  - Updated demo data to showcase image extraction when toggling images.
+
 ## [1.1.0] - 2026-10-11
 
 ### Added

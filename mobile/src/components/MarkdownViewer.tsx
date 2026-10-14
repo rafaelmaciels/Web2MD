@@ -74,7 +74,9 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ markdown }) => {
     }
 
     // Linked image matching: [![alt](imgUrl)](linkUrl)
-    const linkedImgMatch = line.trim().match(/^\[!\[(.*?)\]\((https?:\/\/[^\s\)]+)\)\]\((https?:\/\/[^\s\)]+)\)$/);
+    const linkedImgMatch = line.trim().match(
+      /^\[!\[(.*?)\]\(\s*([^\s\)]+)(?:\s+["'][^"']*["'])?\s*\)\]\(\s*([^\s\)]+)(?:\s+["'][^"']*["'])?\s*\)$/
+    );
     if (linkedImgMatch) {
       const altText = linkedImgMatch[1];
       const imgUrl = linkedImgMatch[2];
@@ -86,7 +88,7 @@ export const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ markdown }) => {
     }
 
     // Image matching: ![alt](url)
-    const imgMatch = line.trim().match(/^!\[(.*?)\]\((https?:\/\/[^\s\)]+)\)$/);
+    const imgMatch = line.trim().match(/^!\[(.*?)\]\(\s*([^\s\)]+)(?:\s+["'][^"']*["'])?\s*\)$/);
     if (imgMatch) {
       const altText = imgMatch[1];
       const imgUrl = imgMatch[2];

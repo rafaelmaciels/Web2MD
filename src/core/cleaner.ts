@@ -79,9 +79,13 @@ export function cleanDOM(documentClone: Document): Document {
     }
   });
 
-  // 3. Remove hidden elements
+  // 3. Remove hidden elements (preserve content media like img, picture, source, and figure)
   const allElements = documentClone.querySelectorAll('*');
   allElements.forEach((el) => {
+    const tagName = el.tagName.toUpperCase();
+    if (tagName === 'IMG' || tagName === 'PICTURE' || tagName === 'SOURCE' || tagName === 'FIGURE') {
+      return;
+    }
     const htmlEl = el as HTMLElement;
     if (htmlEl.getAttribute('aria-hidden') === 'true') {
       htmlEl.remove();

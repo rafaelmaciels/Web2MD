@@ -71,7 +71,7 @@ export const en: TranslationSchema = {
     errorReadFailed: 'Unable to read page content: {error}',
     errorExtractFailed: 'Could not extract main article content from page.',
     demoTitle: 'Welcome to Web2MD Extension',
-    demoContentHtml: '<h1>Web2MD Demo</h1><p>Convert any web page to clean Markdown instantaneously.</p>',
+    demoContentHtml: '<h1>Web2MD Demo</h1><p>Convert any web page to clean Markdown instantaneously.</p><p><img src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?w=800&auto=format&fit=crop&q=80" alt="Workspace with laptop" /></p>',
     demoTextContent: 'Welcome to Web2MD Extension. Convert any web page to clean Markdown instantaneously.',
   },
   options: {

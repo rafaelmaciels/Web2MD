@@ -238,8 +238,8 @@ export function convertToMarkdown(
   const readingTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
 
   // Count images and links in final markdown
-  const imageMatches = finalMarkdown.match(/!\[.*?\]\((https?:\/\/[^\s\)]+|\/[^\s\)]+)\)/g) || [];
-  const linkMatches = finalMarkdown.match(/\[.*?\]\((https?:\/\/[^\s\)]+|\/[^\s\)]+)\)/g) || [];
+  const imageMatches = finalMarkdown.match(/!\[.*?\]\([^\s\)]+(?:\s+["'][^"']*["'])?\)/g) || [];
+  const linkMatches = finalMarkdown.match(/\[.*?\]\([^\s\)]+(?:\s+["'][^"']*["'])?\)/g) || [];
 
   const suggestedFilename = sanitizeFilename(extracted.title);
 

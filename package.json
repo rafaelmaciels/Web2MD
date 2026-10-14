@@ -1,6 +1,6 @@
 {
   "name": "web2md",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Chrome & Microsoft Edge Extension to convert web pages into clean Markdown (.md) files",
   "type": "module",
   "scripts": {
